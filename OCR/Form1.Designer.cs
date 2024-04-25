@@ -37,6 +37,9 @@
             this.label1 = new System.Windows.Forms.Label();
             this.txtBuscar = new System.Windows.Forms.TextBox();
             this.cmdBuscar = new System.Windows.Forms.Button();
+            this.cmdComparar = new System.Windows.Forms.Button();
+            this.lblSimilitud = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -139,12 +142,49 @@
             this.cmdBuscar.UseVisualStyleBackColor = true;
             this.cmdBuscar.Click += new System.EventHandler(this.cmdBuscar_Click);
             // 
+            // cmdComparar
+            // 
+            this.cmdComparar.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.cmdComparar.Location = new System.Drawing.Point(858, 12);
+            this.cmdComparar.Name = "cmdComparar";
+            this.cmdComparar.Size = new System.Drawing.Size(75, 23);
+            this.cmdComparar.TabIndex = 6;
+            this.cmdComparar.Text = "Comparar";
+            this.cmdComparar.UseVisualStyleBackColor = true;
+            this.cmdComparar.Click += new System.EventHandler(this.cmdComparar_Click);
+            // 
+            // lblSimilitud
+            // 
+            this.lblSimilitud.AutoSize = true;
+            this.lblSimilitud.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.lblSimilitud.Font = new System.Drawing.Font("Arial", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblSimilitud.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.lblSimilitud.Location = new System.Drawing.Point(939, 17);
+            this.lblSimilitud.Name = "lblSimilitud";
+            this.lblSimilitud.Size = new System.Drawing.Size(0, 18);
+            this.lblSimilitud.TabIndex = 7;
+            // 
+            // label3
+            // 
+            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label3.AutoSize = true;
+            this.label3.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.label3.Font = new System.Drawing.Font("Arial", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.label3.Location = new System.Drawing.Point(1199, 17);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(0, 18);
+            this.label3.TabIndex = 8;
+            // 
             // frmInicio
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Gainsboro;
             this.ClientSize = new System.Drawing.Size(1438, 730);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.lblSimilitud);
+            this.Controls.Add(this.cmdComparar);
             this.Controls.Add(this.cmdBuscar);
             this.Controls.Add(this.txtBuscar);
             this.Controls.Add(this.label1);
@@ -175,6 +215,9 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox txtBuscar;
         private System.Windows.Forms.Button cmdBuscar;
+        private System.Windows.Forms.Button cmdComparar;
+        private System.Windows.Forms.Label lblSimilitud;
+        private System.Windows.Forms.Label label3;
     }
 }
 
