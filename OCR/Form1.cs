@@ -23,6 +23,7 @@ namespace OCR
 
             if (opnArchivo.ShowDialog() == DialogResult.OK)
             {
+                Cursor.Current = Cursors.WaitCursor;
                 //Get the path of specified file
                 lblImagen.Text = opnArchivo.FileName;
                 picEntrada.ImageLocation = lblImagen.Text;
@@ -34,6 +35,7 @@ namespace OCR
                 var text = page.GetText();
 
                 txtSalida.Text = text;
+                Cursor.Current = Cursors.Default;
             }
 
         }
@@ -53,14 +55,14 @@ namespace OCR
             {
                 if (txtBuscar.Text.Length > 0)
                 {
-                    string b = txtBuscar.Text;
-
-                    int t = txtSalida.Text.IndexOf(b);
+                    string b = txtBuscar.Text.ToLower();
+                    string b2 = txtSalida.Text.ToLower();
+                    int t = b2.IndexOf(b);
                     if (t > -1)
                     {
                         Regex regExp = new Regex($"({b})");
 
-                        foreach (Match match in regExp.Matches(txtSalida.Text))
+                        foreach (Match match in regExp.Matches(b2))
                         {
                             txtSalida.Select(match.Index, match.Length);
                             txtSalida.SelectionColor = Color.Blue;
