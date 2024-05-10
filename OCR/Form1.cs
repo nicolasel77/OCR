@@ -149,8 +149,9 @@ namespace OCR
                     int cost = (t[j - 1] == s[i - 1]) ? 0 : 1;
 
                     d[i, j] = Math.Min(
-                        Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
-                        d[i - 1, j - 1] + cost);
+                        Math.Min(d[i - 1, j] + 1, //eliminación
+                        d[i, j - 1] + 1),         //Inserción
+                        d[i - 1, j - 1] + cost);  //Sustitución
                 }
             }
             return d[n, m];
