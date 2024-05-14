@@ -40,6 +40,7 @@
             this.cmdComparar = new System.Windows.Forms.Button();
             this.lblSimilitud = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
+            this.cmdDesaturar = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -176,6 +177,17 @@
             this.label3.Size = new System.Drawing.Size(0, 18);
             this.label3.TabIndex = 8;
             // 
+            // cmdDesaturar
+            // 
+            this.cmdDesaturar.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.cmdDesaturar.Location = new System.Drawing.Point(347, 12);
+            this.cmdDesaturar.Name = "cmdDesaturar";
+            this.cmdDesaturar.Size = new System.Drawing.Size(75, 23);
+            this.cmdDesaturar.TabIndex = 0;
+            this.cmdDesaturar.Text = "Desaturar";
+            this.cmdDesaturar.UseVisualStyleBackColor = true;
+            this.cmdDesaturar.Click += new System.EventHandler(this.cmdDesaturar_Click);
+            // 
             // frmInicio
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -190,6 +202,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.lblImagen);
+            this.Controls.Add(this.cmdDesaturar);
             this.Controls.Add(this.button1);
             this.Name = "frmInicio";
             this.Text = "OCR";
@@ -218,6 +231,7 @@
         private System.Windows.Forms.Button cmdComparar;
         private System.Windows.Forms.Label lblSimilitud;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Button cmdDesaturar;
     }
 }
 

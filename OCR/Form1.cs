@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Tesseract;
+using System.Drawing.Imaging;
 
 namespace OCR
 {
@@ -163,6 +164,73 @@ namespace OCR
                 return 1.0;
 
             return (1.0 - distancia / (double)maxLen);
+        }
+
+        private void cmdDesaturar_Click(object sender, EventArgs e)
+        {
+            // Guardar la imagen resultante
+            string s = lblImagen.Text.Substring(0, lblImagen.Text.LastIndexOf("\\") + 1);
+
+            string d = s;
+            string i = lblImagen.Text.Substring(lblImagen.Text.LastIndexOf("."));
+            string c = lblImagen.Text.Substring(s.Length, lblImagen.Text.Length - s.Length - i.Length);
+            string n = $"{d}Copia {c}{i}";
+            
+            string outputImagePath = n;
+            float exposure = 1.2f; // Adjust this value for more or less exposure
+
+            using (Bitmap bitmap = new Bitmap(lblImagen.Text))
+            {
+                AdjustExposure(bitmap, exposure);
+                bitmap.Save(outputImagePath, System.Drawing.Imaging.ImageFormat.Jpeg);
+            }
+
+            lblImagen.Text = n;           
+            
+            picEntrada.ImageLocation = n;
+
+    
+        }
+
+        static void AdjustExposure(Bitmap bitmap, float exposure)
+        {
+            // Lock the bitmap's bits.
+            Rectangle rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
+            BitmapData bmpData = bitmap.LockBits(rect, ImageLockMode.ReadWrite, bitmap.PixelFormat);
+
+            // Get the address of the first line.
+            IntPtr ptr = bmpData.Scan0;
+
+            // Declare an array to hold the bytes of the bitmap.
+            int bytes = Math.Abs(bmpData.Stride) * bitmap.Height;
+            byte[] rgbValues = new byte[bytes];
+
+            // Copy the RGB values into the array.
+            System.Runtime.InteropServices.Marshal.Copy(ptr, rgbValues, 0, bytes);
+
+            // Adjust the exposure.
+            for (int i = 0; i < rgbValues.Length; i += 4)
+            {
+                rgbValues[i] = AdjustPixel(rgbValues[i], exposure);     // Blue
+                rgbValues[i + 1] = AdjustPixel(rgbValues[i + 1], exposure); // Green
+                rgbValues[i + 2] = AdjustPixel(rgbValues[i + 2], exposure); // Red
+                                                                            // Alpha channel (rgbValues[i + 3]) stays the same
+            }
+
+            // Copy the RGB values back to the bitmap.
+            System.Runtime.InteropServices.Marshal.Copy(rgbValues, 0, ptr, bytes);
+
+            // Unlock the bits.
+            bitmap.UnlockBits(bmpData);
+        }
+
+        static byte AdjustPixel(byte colorValue, float exposure)
+        {
+            float newValue = colorValue * exposure;
+            if (newValue < 0) { newValue = 0; }
+            if (newValue > 255) { newValue = 255;}
+
+            return (byte)newValue;
         }
     }
 }
