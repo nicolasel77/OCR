@@ -40,6 +40,8 @@
             this.cmdComparar = new System.Windows.Forms.Button();
             this.lblSimilitud = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
+            this.cmdPrueba_firma = new System.Windows.Forms.Button();
+            this.lblRespuesta = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -176,12 +178,36 @@
             this.label3.Size = new System.Drawing.Size(0, 18);
             this.label3.TabIndex = 8;
             // 
+            // cmdPrueba_firma
+            // 
+            this.cmdPrueba_firma.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmdPrueba_firma.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.cmdPrueba_firma.Location = new System.Drawing.Point(967, 12);
+            this.cmdPrueba_firma.Name = "cmdPrueba_firma";
+            this.cmdPrueba_firma.Size = new System.Drawing.Size(75, 23);
+            this.cmdPrueba_firma.TabIndex = 9;
+            this.cmdPrueba_firma.Text = "Comparar";
+            this.cmdPrueba_firma.UseVisualStyleBackColor = true;
+            this.cmdPrueba_firma.Click += new System.EventHandler(this.cmdPrueba_firma_Click);
+            // 
+            // lblRespuesta
+            // 
+            this.lblRespuesta.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblRespuesta.AutoSize = true;
+            this.lblRespuesta.Location = new System.Drawing.Point(1048, 15);
+            this.lblRespuesta.Name = "lblRespuesta";
+            this.lblRespuesta.Size = new System.Drawing.Size(81, 13);
+            this.lblRespuesta.TabIndex = 10;
+            this.lblRespuesta.Text = "Texto a buscar:";
+            // 
             // frmInicio
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Gainsboro;
             this.ClientSize = new System.Drawing.Size(1438, 730);
+            this.Controls.Add(this.lblRespuesta);
+            this.Controls.Add(this.cmdPrueba_firma);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.lblSimilitud);
             this.Controls.Add(this.cmdComparar);
@@ -218,6 +244,8 @@
         private System.Windows.Forms.Button cmdComparar;
         private System.Windows.Forms.Label lblSimilitud;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Button cmdPrueba_firma;
+        private System.Windows.Forms.Label lblRespuesta;
     }
 }
 

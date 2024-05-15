@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Emgu.CV;
+using Emgu.CV.CvEnum;
+using Emgu.CV.Structure;
+using Emgu.CV.Util;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text.RegularExpressions;
@@ -86,7 +90,7 @@ namespace OCR
             palabra2 = palabra2.Replace("\n", " ");
 
             if (palabra1.Length > 0 && palabra2.Length > 0)
-            { 
+            {
                 List<string> list1 = new List<string>(palabra1.Split(' '));
 
                 //Separo las palabras encontradas por el OCR
@@ -125,7 +129,8 @@ namespace OCR
                 label3.Text = mejor_match;
 
                 lblSimilitud.Text = $"La similitud es del: {similitud * 100:0.00}%";
-            } else { lblSimilitud.Text = "No hay texto para comparar"; }
+            }
+            else { lblSimilitud.Text = "No hay texto para comparar"; }
         }
 
         static int CalcularDistanciaLevenshtein(string s, string t)
@@ -164,6 +169,61 @@ namespace OCR
                 return 1.0;
 
             return (1.0 - distancia / (double)maxLen);
+        }
+
+        private void cmdPrueba_firma_Click(object sender, EventArgs e)
+        {
+            string imagePath = lblImagen.Text;
+
+            // Cargar la imagen
+            var image = Image.FromFile(lblImagen.Text);
+            Mat img = CvInvoke.Imread(image, ImreadModes.Color);
+
+            if (img.IsEmpty)
+            {
+                lblRespuesta.Text = "Error: No se pudo cargar la imagen.";
+                return;
+            }
+
+            // Convertir a escala de grises
+            Mat gray = new Mat();
+            CvInvoke.CvtColor(img, gray, ColorConversion.Bgr2Gray);
+
+            // Aplicar umbralización
+            Mat thresh = new Mat();
+            CvInvoke.Threshold(gray, thresh, 127, 255, ThresholdType.BinaryInv);
+
+            // Encontrar contornos
+            using (VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint())
+            {
+                Mat hierarchy = new Mat();
+                CvInvoke.FindContours(thresh, contours, hierarchy, RetrType.External, ChainApproxMethod.ChainApproxSimple);
+
+                // Dibujar contornos y verificar si hay firmas
+                bool hasSignature = false;
+                for (int i = 0; i < contours.Size; i++)
+                {
+                    double contourArea = CvInvoke.ContourArea(contours[i]);
+                    if (contourArea > 500) // Este valor debe ajustarse según tus necesidades
+                    {
+                        hasSignature = true;
+                        CvInvoke.DrawContours(img, contours, i, new MCvScalar(0, 0, 255), 2);
+                    }
+                }
+
+                // Guardar la imagen con los contornos dibujados
+                string outputPath = "path_to_output_image.jpg";
+                img.Save(outputPath);
+
+                if (hasSignature)
+                {
+                    lblRespuesta.Text = "La imagen contiene una firma.";
+                }
+                else
+                {
+                    lblRespuesta.Text = "No se detectaron firmas en la imagen.";
+                }
+            }
         }
     }
 }
