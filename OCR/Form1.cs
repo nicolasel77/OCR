@@ -172,60 +172,60 @@ namespace OCR
             return (1.0 - distancia / (double)maxLen);
         }
 
-        private void cmdPrueba_firma_Click(object sender, EventArgs e)
-        {
-            string imagePath = lblImagen.Text;
+        //private void cmdPrueba_firma_Click(object sender, EventArgs e)
+        //{
+        //    string imagePath = lblImagen.Text;
 
-            // Cargar la imagen
-            var image = Image.FromFile(lblImagen.Text);
-            Mat img = CvInvoke.Imread(image, ImreadModes.Color);
+        //    // Cargar la imagen
+        //    var image = Image.FromFile(lblImagen.Text);
+        //    Mat img = CvInvoke.Imread(image, ImreadModes.Color);
 
-            if (img.IsEmpty)
-            {
-                lblRespuesta.Text = "Error: No se pudo cargar la imagen.";
-                return;
-            }
+        //    if (img.IsEmpty)
+        //    {
+        //        lblRespuesta.Text = "Error: No se pudo cargar la imagen.";
+        //        return;
+        //    }
 
-            // Convertir a escala de grises
-            Mat gray = new Mat();
-            CvInvoke.CvtColor(img, gray, ColorConversion.Bgr2Gray);
+        //    // Convertir a escala de grises
+        //    Mat gray = new Mat();
+        //    CvInvoke.CvtColor(img, gray, ColorConversion.Bgr2Gray);
 
-            // Aplicar umbralización
-            Mat thresh = new Mat();
-            CvInvoke.Threshold(gray, thresh, 127, 255, ThresholdType.BinaryInv);
+        //    // Aplicar umbralización
+        //    Mat thresh = new Mat();
+        //    CvInvoke.Threshold(gray, thresh, 127, 255, ThresholdType.BinaryInv);
 
-            // Encontrar contornos
-            using (VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint())
-            {
-                Mat hierarchy = new Mat();
-                CvInvoke.FindContours(thresh, contours, hierarchy, RetrType.External, ChainApproxMethod.ChainApproxSimple);
+        //    // Encontrar contornos
+        //    using (VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint())
+        //    {
+        //        Mat hierarchy = new Mat();
+        //        CvInvoke.FindContours(thresh, contours, hierarchy, RetrType.External, ChainApproxMethod.ChainApproxSimple);
 
-                // Dibujar contornos y verificar si hay firmas
-                bool hasSignature = false;
-                for (int i = 0; i < contours.Size; i++)
-                {
-                    double contourArea = CvInvoke.ContourArea(contours[i]);
-                    if (contourArea > 500) // Este valor debe ajustarse según tus necesidades
-                    {
-                        hasSignature = true;
-                        CvInvoke.DrawContours(img, contours, i, new MCvScalar(0, 0, 255), 2);
-                    }
-                }
+        //        // Dibujar contornos y verificar si hay firmas
+        //        bool hasSignature = false;
+        //        for (int i = 0; i < contours.Size; i++)
+        //        {
+        //            double contourArea = CvInvoke.ContourArea(contours[i]);
+        //            if (contourArea > 500) // Este valor debe ajustarse según tus necesidades
+        //            {
+        //                hasSignature = true;
+        //                CvInvoke.DrawContours(img, contours, i, new MCvScalar(0, 0, 255), 2);
+        //            }
+        //        }
 
-                // Guardar la imagen con los contornos dibujados
-                string outputPath = "path_to_output_image.jpg";
-                img.Save(outputPath);
+        //        // Guardar la imagen con los contornos dibujados
+        //        string outputPath = "path_to_output_image.jpg";
+        //        img.Save(outputPath);
 
-                if (hasSignature)
-                {
-                    lblRespuesta.Text = "La imagen contiene una firma.";
-                }
-                else
-                {
-                    lblRespuesta.Text = "No se detectaron firmas en la imagen.";
-                }
-            }
-        }
+        //        if (hasSignature)
+        //        {
+        //            lblRespuesta.Text = "La imagen contiene una firma.";
+        //        }
+        //        else
+        //        {
+        //            lblRespuesta.Text = "No se detectaron firmas en la imagen.";
+        //        }
+        //    }
+        //}
 
         private void cmdDesaturar_Click(object sender, EventArgs e)
         {
