@@ -127,7 +127,7 @@ namespace OCR
 
                 distancia = CalcularDistanciaLevenshtein(txtBuscar.Text.ToLower(), mejor_match);
                 similitud = CalcularSimilitud(txtBuscar.Text, mejor_match, distancia);
-                label3.Text = mejor_match;
+                //label3.Text = mejor_match;
 
                 lblSimilitud.Text = $"La similitud es del: {similitud * 100:0.00}%";
             }
@@ -292,6 +292,11 @@ namespace OCR
             if (newValue > 255) { newValue = 255;}
 
             return (byte)newValue;
+        }
+
+        private void frmInicio_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

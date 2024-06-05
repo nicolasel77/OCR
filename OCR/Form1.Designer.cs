@@ -39,7 +39,6 @@
             this.cmdBuscar = new System.Windows.Forms.Button();
             this.cmdComparar = new System.Windows.Forms.Button();
             this.lblSimilitud = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
             this.cmdDesaturar = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -165,18 +164,6 @@
             this.lblSimilitud.Size = new System.Drawing.Size(0, 18);
             this.lblSimilitud.TabIndex = 7;
             // 
-            // label3
-            // 
-            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.label3.AutoSize = true;
-            this.label3.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.label3.Font = new System.Drawing.Font("Arial", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.label3.Location = new System.Drawing.Point(1199, 17);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(0, 18);
-            this.label3.TabIndex = 8;
-            // 
             // cmdDesaturar
             // 
             this.cmdDesaturar.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
@@ -194,7 +181,6 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Gainsboro;
             this.ClientSize = new System.Drawing.Size(1438, 730);
-            this.Controls.Add(this.label3);
             this.Controls.Add(this.lblSimilitud);
             this.Controls.Add(this.cmdDesaturar);
             this.Controls.Add(this.cmdComparar);
@@ -207,6 +193,7 @@
             this.Name = "frmInicio";
             this.Text = "OCR";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+            this.Load += new System.EventHandler(this.frmInicio_Load);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
@@ -230,7 +217,6 @@
         private System.Windows.Forms.Button cmdBuscar;
         private System.Windows.Forms.Button cmdComparar;
         private System.Windows.Forms.Label lblSimilitud;
-        private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button cmdDesaturar;
     }
 }
