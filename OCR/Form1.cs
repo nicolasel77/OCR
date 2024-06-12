@@ -28,7 +28,7 @@ namespace OCR
                 lblImagen.Text = opnArchivo.FileName;
                 picEntrada.ImageLocation = lblImagen.Text;
 
-                var engine = new TesseractEngine(@"D:\tessdata", "eng");
+                var engine = new TesseractEngine(@"D:\tessdata", "rus");
                 var image = Pix.LoadFromFile(lblImagen.Text);
                 var page = engine.Process(image);
 
