@@ -1,9 +1,14 @@
-﻿using System;
+﻿using Emgu.CV;
+using Emgu.CV.CvEnum;
+using Emgu.CV.Structure;
+using Emgu.CV.Util;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Tesseract;
+using System.Drawing.Imaging;
 
 namespace OCR
 {
@@ -86,7 +91,7 @@ namespace OCR
             palabra2 = palabra2.Replace("\n", " ");
 
             if (palabra1.Length > 0 && palabra2.Length > 0)
-            { 
+            {
                 List<string> list1 = new List<string>(palabra1.Split(' '));
 
                 //Separo las palabras encontradas por el OCR
@@ -122,10 +127,11 @@ namespace OCR
 
                 distancia = CalcularDistanciaLevenshtein(txtBuscar.Text.ToLower(), mejor_match);
                 similitud = CalcularSimilitud(txtBuscar.Text, mejor_match, distancia);
-                label3.Text = mejor_match;
+                //label3.Text = mejor_match;
 
                 lblSimilitud.Text = $"La similitud es del: {similitud * 100:0.00}%";
-            } else { lblSimilitud.Text = "No hay texto para comparar"; }
+            }
+            else { lblSimilitud.Text = "No hay texto para comparar"; }
         }
 
         static int CalcularDistanciaLevenshtein(string s, string t)
@@ -164,6 +170,133 @@ namespace OCR
                 return 1.0;
 
             return (1.0 - distancia / (double)maxLen);
+        }
+
+        //private void cmdPrueba_firma_Click(object sender, EventArgs e)
+        //{
+        //    string imagePath = lblImagen.Text;
+
+        //    // Cargar la imagen
+        //    var image = Image.FromFile(lblImagen.Text);
+        //    Mat img = CvInvoke.Imread(image, ImreadModes.Color);
+
+        //    if (img.IsEmpty)
+        //    {
+        //        lblRespuesta.Text = "Error: No se pudo cargar la imagen.";
+        //        return;
+        //    }
+
+        //    // Convertir a escala de grises
+        //    Mat gray = new Mat();
+        //    CvInvoke.CvtColor(img, gray, ColorConversion.Bgr2Gray);
+
+        //    // Aplicar umbralización
+        //    Mat thresh = new Mat();
+        //    CvInvoke.Threshold(gray, thresh, 127, 255, ThresholdType.BinaryInv);
+
+        //    // Encontrar contornos
+        //    using (VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint())
+        //    {
+        //        Mat hierarchy = new Mat();
+        //        CvInvoke.FindContours(thresh, contours, hierarchy, RetrType.External, ChainApproxMethod.ChainApproxSimple);
+
+        //        // Dibujar contornos y verificar si hay firmas
+        //        bool hasSignature = false;
+        //        for (int i = 0; i < contours.Size; i++)
+        //        {
+        //            double contourArea = CvInvoke.ContourArea(contours[i]);
+        //            if (contourArea > 500) // Este valor debe ajustarse según tus necesidades
+        //            {
+        //                hasSignature = true;
+        //                CvInvoke.DrawContours(img, contours, i, new MCvScalar(0, 0, 255), 2);
+        //            }
+        //        }
+
+        //        // Guardar la imagen con los contornos dibujados
+        //        string outputPath = "path_to_output_image.jpg";
+        //        img.Save(outputPath);
+
+        //        if (hasSignature)
+        //        {
+        //            lblRespuesta.Text = "La imagen contiene una firma.";
+        //        }
+        //        else
+        //        {
+        //            lblRespuesta.Text = "No se detectaron firmas en la imagen.";
+        //        }
+        //    }
+        //}
+
+        private void cmdDesaturar_Click(object sender, EventArgs e)
+        {
+            // Guardar la imagen resultante
+            string s = lblImagen.Text.Substring(0, lblImagen.Text.LastIndexOf("\\") + 1);
+
+            string d = s;
+            string i = lblImagen.Text.Substring(lblImagen.Text.LastIndexOf("."));
+            string c = lblImagen.Text.Substring(s.Length, lblImagen.Text.Length - s.Length - i.Length);
+            string n = $"{d}Copia {c}{i}";
+            
+            string outputImagePath = n;
+            float exposure = 1.2f; // Adjust this value for more or less exposure
+
+            using (Bitmap bitmap = new Bitmap(lblImagen.Text))
+            {
+                AdjustExposure(bitmap, exposure);
+                bitmap.Save(outputImagePath, System.Drawing.Imaging.ImageFormat.Jpeg);
+            }
+
+            lblImagen.Text = n;           
+            
+            picEntrada.ImageLocation = n;
+
+    
+        }
+
+        static void AdjustExposure(Bitmap bitmap, float exposure)
+        {
+            // Lock the bitmap's bits.
+            Rectangle rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
+            BitmapData bmpData = bitmap.LockBits(rect, ImageLockMode.ReadWrite, bitmap.PixelFormat);
+
+            // Get the address of the first line.
+            IntPtr ptr = bmpData.Scan0;
+
+            // Declare an array to hold the bytes of the bitmap.
+            int bytes = Math.Abs(bmpData.Stride) * bitmap.Height;
+            byte[] rgbValues = new byte[bytes];
+
+            // Copy the RGB values into the array.
+            System.Runtime.InteropServices.Marshal.Copy(ptr, rgbValues, 0, bytes);
+
+            // Adjust the exposure.
+            for (int i = 0; i < rgbValues.Length; i += 4)
+            {
+                rgbValues[i] = AdjustPixel(rgbValues[i], exposure);     // Blue
+                rgbValues[i + 1] = AdjustPixel(rgbValues[i + 1], exposure); // Green
+                rgbValues[i + 2] = AdjustPixel(rgbValues[i + 2], exposure); // Red
+                                                                            // Alpha channel (rgbValues[i + 3]) stays the same
+            }
+
+            // Copy the RGB values back to the bitmap.
+            System.Runtime.InteropServices.Marshal.Copy(rgbValues, 0, ptr, bytes);
+
+            // Unlock the bits.
+            bitmap.UnlockBits(bmpData);
+        }
+
+        static byte AdjustPixel(byte colorValue, float exposure)
+        {
+            float newValue = colorValue * exposure;
+            if (newValue < 0) { newValue = 0; }
+            if (newValue > 255) { newValue = 255;}
+
+            return (byte)newValue;
+        }
+
+        private void frmInicio_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
