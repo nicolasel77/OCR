@@ -39,9 +39,7 @@
             this.cmdBuscar = new System.Windows.Forms.Button();
             this.cmdComparar = new System.Windows.Forms.Button();
             this.lblSimilitud = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.cmdPrueba_firma = new System.Windows.Forms.Button();
-            this.lblRespuesta = new System.Windows.Forms.Label();
+            this.cmdDesaturar = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -166,39 +164,16 @@
             this.lblSimilitud.Size = new System.Drawing.Size(0, 18);
             this.lblSimilitud.TabIndex = 7;
             // 
-            // label3
+            // cmdDesaturar
             // 
-            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.label3.AutoSize = true;
-            this.label3.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.label3.Font = new System.Drawing.Font("Arial", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.label3.Location = new System.Drawing.Point(1199, 17);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(0, 18);
-            this.label3.TabIndex = 8;
-            // 
-            // cmdPrueba_firma
-            // 
-            this.cmdPrueba_firma.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.cmdPrueba_firma.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.cmdPrueba_firma.Location = new System.Drawing.Point(967, 12);
-            this.cmdPrueba_firma.Name = "cmdPrueba_firma";
-            this.cmdPrueba_firma.Size = new System.Drawing.Size(75, 23);
-            this.cmdPrueba_firma.TabIndex = 9;
-            this.cmdPrueba_firma.Text = "Comparar";
-            this.cmdPrueba_firma.UseVisualStyleBackColor = true;
-            this.cmdPrueba_firma.Click += new System.EventHandler(this.cmdPrueba_firma_Click);
-            // 
-            // lblRespuesta
-            // 
-            this.lblRespuesta.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblRespuesta.AutoSize = true;
-            this.lblRespuesta.Location = new System.Drawing.Point(1048, 15);
-            this.lblRespuesta.Name = "lblRespuesta";
-            this.lblRespuesta.Size = new System.Drawing.Size(81, 13);
-            this.lblRespuesta.TabIndex = 10;
-            this.lblRespuesta.Text = "Texto a buscar:";
+            this.cmdDesaturar.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.cmdDesaturar.Location = new System.Drawing.Point(942, 12);
+            this.cmdDesaturar.Name = "cmdDesaturar";
+            this.cmdDesaturar.Size = new System.Drawing.Size(75, 23);
+            this.cmdDesaturar.TabIndex = 6;
+            this.cmdDesaturar.Text = "Desaturar";
+            this.cmdDesaturar.UseVisualStyleBackColor = true;
+            this.cmdDesaturar.Click += new System.EventHandler(this.cmdDesaturar_Click);
             // 
             // frmInicio
             // 
@@ -206,10 +181,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Gainsboro;
             this.ClientSize = new System.Drawing.Size(1438, 730);
-            this.Controls.Add(this.lblRespuesta);
-            this.Controls.Add(this.cmdPrueba_firma);
-            this.Controls.Add(this.label3);
             this.Controls.Add(this.lblSimilitud);
+            this.Controls.Add(this.cmdDesaturar);
             this.Controls.Add(this.cmdComparar);
             this.Controls.Add(this.cmdBuscar);
             this.Controls.Add(this.txtBuscar);
@@ -220,6 +193,7 @@
             this.Name = "frmInicio";
             this.Text = "OCR";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+            this.Load += new System.EventHandler(this.frmInicio_Load);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
@@ -243,9 +217,7 @@
         private System.Windows.Forms.Button cmdBuscar;
         private System.Windows.Forms.Button cmdComparar;
         private System.Windows.Forms.Label lblSimilitud;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Button cmdPrueba_firma;
-        private System.Windows.Forms.Label lblRespuesta;
+        private System.Windows.Forms.Button cmdDesaturar;
     }
 }
 
