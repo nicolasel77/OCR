@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Tesseract;
 using System.Drawing.Imaging;
+using System.IO;
 
 namespace OCR
 {
@@ -21,16 +22,22 @@ namespace OCR
 
         private void button1_Click(object sender, EventArgs e)
         {
-            opnArchivo.InitialDirectory = "c:\\";
-            opnArchivo.Filter = "jpg files (*.jpg)|*.jpg|All files (*.*)|*.*";
-            opnArchivo.FilterIndex = 2;
-            opnArchivo.RestoreDirectory = true;
+            
 
-            if (opnArchivo.ShowDialog() == DialogResult.OK)
-            {
+        }
+
+        private void buscar_imagen(string path)
+        {
+            //opnArchivo.InitialDirectory = "c:\\";
+            //opnArchivo.Filter = "jpg files (*.jpg)|*.jpg|All files (*.*)|*.*";
+            //opnArchivo.FilterIndex = 2;
+            //opnArchivo.RestoreDirectory = true;
+
+            //if (opnArchivo.ShowDialog() == DialogResult.OK)
+            //{
                 Cursor.Current = Cursors.WaitCursor;
                 //Get the path of specified file
-                lblImagen.Text = opnArchivo.FileName;
+                lblImagen.Text = path;
                 picEntrada.ImageLocation = lblImagen.Text;
 
                 var engine = new TesseractEngine(@"D:\tessdata", "eng");
@@ -41,20 +48,46 @@ namespace OCR
 
                 txtSalida.Text = text;
                 Cursor.Current = Cursors.Default;
-            }
-
+            //}
         }
 
         private void cmdBuscar_Click(object sender, EventArgs e)
         {
             pintar();
+            //try
+            //{
+            // Ruta del archivo .txt
+            //string filePath = @"D:\demo\" + txtBuscar.Text + @"\" + cbTipo.Text + ".txt";
+
+            //    // Leer todo el contenido del archivo y asignarlo a una variable string
+            //    string fileContent = File.ReadAllText(filePath);
+
+            //    // Mostrar el contenido en la consola
+            //    txtRespuestas.Text = fileContent;
+            //}
+            //catch (Exception e)
+            //{
+            //    // Manejo de errores en caso de que ocurra algún problema al leer el archivo
+            //    Console.WriteLine("Ocurrió un error al leer el archivo:");
+            //    Console.WriteLine(e.Message);
+            //}
+
         }
 
         private void pintar()
         {
-            txtSalida.SelectAll();
-            txtSalida.SelectionColor = Color.Black;
-            txtSalida.DeselectAll();
+            //txtSalida.SelectAll();
+            //txtSalida.SelectionColor = Color.Black;
+            //txtSalida.DeselectAll();
+            string filePath = @"D:\demo\" + txtBuscar.Text + @"\" + cbTipo.Text;
+
+            // Leer todo el contenido del archivo y asignarlo a una variable string
+            buscar_imagen(filePath + ".jpg");
+            string fileContent = File.ReadAllText(filePath + ".txt");
+
+            //Mostrar el contenido en la consola
+            //txtRespuestas.Text = fileContent;
+
 
             if (txtSalida.Text.Length > 0)
             {
@@ -79,11 +112,22 @@ namespace OCR
 
         private void txtBuscar_TextChanged(object sender, EventArgs e)
         {
-            pintar();
+            //pintar();
         }
 
         private void cmdComparar_Click(object sender, EventArgs e)
         {
+            //txtSalida.SelectAll();
+            //txtSalida.SelectionColor = Color.Black;
+            //txtSalida.DeselectAll();
+            string filePath = @"D:\demo\" + txtBuscar.Text + @"\" + cbTipo.Text;
+
+            // Leer todo el contenido del archivo y asignarlo a una variable string
+            buscar_imagen(filePath + ".jpg");
+            string fileContent = File.ReadAllText(filePath + ".txt");
+
+            //Mostrar el contenido en la consola
+            //txtRespuestas.Text = fileContent;
 
             string palabra1 = txtBuscar.Text.ToLower();
             string palabra2 = txtSalida.Text.ToLower();

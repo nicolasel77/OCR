@@ -40,6 +40,8 @@
             this.cmdComparar = new System.Windows.Forms.Button();
             this.lblSimilitud = new System.Windows.Forms.Label();
             this.cmdDesaturar = new System.Windows.Forms.Button();
+            this.txtRespuestas = new System.Windows.Forms.RichTextBox();
+            this.cbTipo = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -56,6 +58,7 @@
             this.button1.TabIndex = 0;
             this.button1.Text = "Imagen";
             this.button1.UseVisualStyleBackColor = true;
+            this.button1.Visible = false;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // lblImagen
@@ -66,6 +69,7 @@
             this.lblImagen.Size = new System.Drawing.Size(42, 13);
             this.lblImagen.TabIndex = 1;
             this.lblImagen.Text = "Imagen";
+            this.lblImagen.Visible = false;
             // 
             // splitContainer1
             // 
@@ -75,7 +79,6 @@
             this.splitContainer1.BackColor = System.Drawing.Color.Silver;
             this.splitContainer1.Location = new System.Drawing.Point(11, 41);
             this.splitContainer1.Name = "splitContainer1";
-            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
             // splitContainer1.Panel1
             // 
@@ -85,9 +88,10 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.BackColor = System.Drawing.SystemColors.Control;
+            this.splitContainer1.Panel2.Controls.Add(this.txtRespuestas);
             this.splitContainer1.Panel2.Controls.Add(this.txtSalida);
             this.splitContainer1.Size = new System.Drawing.Size(1415, 677);
-            this.splitContainer1.SplitterDistance = 349;
+            this.splitContainer1.SplitterDistance = 783;
             this.splitContainer1.SplitterWidth = 10;
             this.splitContainer1.TabIndex = 2;
             // 
@@ -96,7 +100,7 @@
             this.picEntrada.Dock = System.Windows.Forms.DockStyle.Fill;
             this.picEntrada.Location = new System.Drawing.Point(0, 0);
             this.picEntrada.Name = "picEntrada";
-            this.picEntrada.Size = new System.Drawing.Size(1415, 349);
+            this.picEntrada.Size = new System.Drawing.Size(783, 677);
             this.picEntrada.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.picEntrada.TabIndex = 0;
             this.picEntrada.TabStop = false;
@@ -108,24 +112,24 @@
             this.txtSalida.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtSalida.Location = new System.Drawing.Point(0, 0);
             this.txtSalida.Name = "txtSalida";
-            this.txtSalida.Size = new System.Drawing.Size(1415, 318);
+            this.txtSalida.Size = new System.Drawing.Size(622, 677);
             this.txtSalida.TabIndex = 0;
             this.txtSalida.Text = "";
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(428, 17);
+            this.label1.Location = new System.Drawing.Point(6, 17);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(81, 13);
+            this.label1.Size = new System.Drawing.Size(60, 13);
             this.label1.TabIndex = 3;
-            this.label1.Text = "Texto a buscar:";
+            this.label1.Text = "Estudiante:";
             // 
             // txtBuscar
             // 
             this.txtBuscar.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtBuscar.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtBuscar.Location = new System.Drawing.Point(515, 15);
+            this.txtBuscar.Location = new System.Drawing.Point(63, 15);
             this.txtBuscar.Name = "txtBuscar";
             this.txtBuscar.Size = new System.Drawing.Size(256, 15);
             this.txtBuscar.TabIndex = 4;
@@ -175,12 +179,37 @@
             this.cmdDesaturar.UseVisualStyleBackColor = true;
             this.cmdDesaturar.Click += new System.EventHandler(this.cmdDesaturar_Click);
             // 
+            // txtRespuestas
+            // 
+            this.txtRespuestas.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtRespuestas.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtRespuestas.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtRespuestas.Location = new System.Drawing.Point(0, 0);
+            this.txtRespuestas.Name = "txtRespuestas";
+            this.txtRespuestas.ReadOnly = true;
+            this.txtRespuestas.Size = new System.Drawing.Size(622, 677);
+            this.txtRespuestas.TabIndex = 1;
+            this.txtRespuestas.Text = "";
+            // 
+            // cbTipo
+            // 
+            this.cbTipo.FormattingEnabled = true;
+            this.cbTipo.Items.AddRange(new object[] {
+            "Birth",
+            "Photo id",
+            "Proof"});
+            this.cbTipo.Location = new System.Drawing.Point(1184, 9);
+            this.cbTipo.Name = "cbTipo";
+            this.cbTipo.Size = new System.Drawing.Size(242, 21);
+            this.cbTipo.TabIndex = 8;
+            // 
             // frmInicio
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Gainsboro;
             this.ClientSize = new System.Drawing.Size(1438, 730);
+            this.Controls.Add(this.cbTipo);
             this.Controls.Add(this.lblSimilitud);
             this.Controls.Add(this.cmdDesaturar);
             this.Controls.Add(this.cmdComparar);
@@ -218,6 +247,8 @@
         private System.Windows.Forms.Button cmdComparar;
         private System.Windows.Forms.Label lblSimilitud;
         private System.Windows.Forms.Button cmdDesaturar;
+        private System.Windows.Forms.RichTextBox txtRespuestas;
+        private System.Windows.Forms.ComboBox cbTipo;
     }
 }
 
