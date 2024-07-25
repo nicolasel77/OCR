@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using Tesseract;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 
 namespace OCR
 {
@@ -125,57 +126,65 @@ namespace OCR
             // Leer todo el contenido del archivo y asignarlo a una variable string
             buscar_imagen(filePath + ".jpg");
             string fileContent = File.ReadAllText(filePath + ".txt");
+            string d = "";
+            for (int cont = 0; cont < fileContent.Count(); cont++)
+            { 
+                d = d + fileContent.Substring(cont, fileContent.IndexOf(":", cont) + 2 - cont);
+                cont = fileContent.IndexOf(":", cont) + 2;
+                //Mostrar el contenido en la consola
+                //txtRespuestas.Text = fileContent;
+                string palabra1 = fileContent.Substring(cont, fileContent.IndexOf(";", cont) - cont);
+                string palabra2 = txtSalida.Text.ToLower();
 
-            //Mostrar el contenido en la consola
-            //txtRespuestas.Text = fileContent;
+                palabra2 = palabra2.Replace("\n", " ");
 
-            string palabra1 = txtBuscar.Text.ToLower();
-            string palabra2 = txtSalida.Text.ToLower();
-
-            palabra2 = palabra2.Replace("\n", " ");
-
-            if (palabra1.Length > 0 && palabra2.Length > 0)
-            {
-                List<string> list1 = new List<string>(palabra1.Split(' '));
-
-                //Separo las palabras encontradas por el OCR
-                //Más Adelante la idea es que la devuelva la IA directo
-
-                List<string> list2 = new List<string>(palabra2.Split(' '));
-
-                double mas_proxima = 0;
-                double nva_comparacion;
-                int id_mas_prox = 0;
-                int distancia;
-                double similitud = 0;
-                string mejor_match = "";
-
-                for (int i = 0; i < list1.Count; i++)
+                if (palabra1.Length > 0 && palabra2.Length > 0)
                 {
-                    for (int j = 0; j < list2.Count; j++)
+                    List<string> list1 = new List<string>(palabra1.Split(' '));
+
+                    //Separo las palabras encontradas por el OCR
+                    //Más Adelante la idea es que la devuelva la IA directo
+
+                    List<string> list2 = new List<string>(palabra2.Split(' '));
+
+                    double mas_proxima = 0;
+                    double nva_comparacion;
+                    int id_mas_prox = 0;
+                    int distancia;
+                    double similitud = 0;
+                    string mejor_match = "";
+
+                    for (int i = 0; i < list1.Count; i++)
                     {
-                        distancia = CalcularDistanciaLevenshtein(list1[i], list2[j]);
-                        nva_comparacion = CalcularSimilitud(list1[i], list2[j], distancia);
-                        if (nva_comparacion > mas_proxima) { mas_proxima = nva_comparacion; id_mas_prox = j; }
+                        for (int j = 0; j < list2.Count; j++)
+                        {
+                            distancia = CalcularDistanciaLevenshtein(list1[i], list2[j]);
+                            nva_comparacion = CalcularSimilitud(list1[i], list2[j], distancia);
+                            if (nva_comparacion > mas_proxima) { mas_proxima = nva_comparacion; id_mas_prox = j; }
+                        }
+                        distancia = CalcularDistanciaLevenshtein(list1[i], list2[id_mas_prox]);
+                        similitud += CalcularSimilitud(list1[i], list2[id_mas_prox], distancia);
+                        mejor_match = mejor_match + " " + list2[id_mas_prox];
+                        list2.Remove(list2[id_mas_prox]);
+
+                        mas_proxima = 0;
+                        id_mas_prox = 0;
                     }
-                    distancia = CalcularDistanciaLevenshtein(list1[i], list2[id_mas_prox]);
-                    similitud += CalcularSimilitud(list1[i], list2[id_mas_prox], distancia);
-                    mejor_match = mejor_match + " " + list2[id_mas_prox];
-                    list2.Remove(list2[id_mas_prox]);
 
-                    mas_proxima = 0;
-                    id_mas_prox = 0;
+                    mejor_match = mejor_match.Substring(1);
+
+                    distancia = CalcularDistanciaLevenshtein(palabra1, mejor_match);
+                    similitud = CalcularSimilitud(palabra1, mejor_match, distancia);
+                    //label3.Text = mejor_match;
+
+                    lblSimilitud.Text = $"La similitud es del: {similitud * 100:0.00}%";
+                    d = d + mejor_match + $" {similitud * 100:0.00}%";
                 }
-
-                mejor_match = mejor_match.Substring(1);
-
-                distancia = CalcularDistanciaLevenshtein(txtBuscar.Text.ToLower(), mejor_match);
-                similitud = CalcularSimilitud(txtBuscar.Text, mejor_match, distancia);
-                //label3.Text = mejor_match;
-
-                lblSimilitud.Text = $"La similitud es del: {similitud * 100:0.00}%";
+                else { lblSimilitud.Text = "No hay texto para comparar"; }
+                d = d + "\n";
+                cont = fileContent.IndexOf(";", cont) + 1;
             }
-            else { lblSimilitud.Text = "No hay texto para comparar"; }
+            txtRespuestas.Text = d;
         }
 
         static int CalcularDistanciaLevenshtein(string s, string t)
