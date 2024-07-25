@@ -29,6 +29,7 @@ namespace OCR
 
         private void buscar_imagen(string path)
         {
+                txtRespuestas.Text = "";
             //opnArchivo.InitialDirectory = "c:\\";
             //opnArchivo.Filter = "jpg files (*.jpg)|*.jpg|All files (*.*)|*.*";
             //opnArchivo.FilterIndex = 2;
@@ -137,6 +138,8 @@ namespace OCR
                 string palabra2 = txtSalida.Text.ToLower();
 
                 palabra2 = palabra2.Replace("\n", " ");
+                palabra2 = palabra2.Replace(",", " ");
+                palabra2 = palabra2.Replace(",", "-");
 
                 if (palabra1.Length > 0 && palabra2.Length > 0)
                 {
@@ -282,6 +285,8 @@ namespace OCR
 
         private void cmdDesaturar_Click(object sender, EventArgs e)
         {
+            //txtRespuestas.Text = txtSalida.Text;
+
             // Guardar la imagen resultante
             string s = lblImagen.Text.Substring(0, lblImagen.Text.LastIndexOf("\\") + 1);
 
@@ -289,7 +294,7 @@ namespace OCR
             string i = lblImagen.Text.Substring(lblImagen.Text.LastIndexOf("."));
             string c = lblImagen.Text.Substring(s.Length, lblImagen.Text.Length - s.Length - i.Length);
             string n = $"{d}Copia {c}{i}";
-            
+
             string outputImagePath = n;
             float exposure = 1.2f; // Adjust this value for more or less exposure
 
@@ -299,11 +304,11 @@ namespace OCR
                 bitmap.Save(outputImagePath, System.Drawing.Imaging.ImageFormat.Jpeg);
             }
 
-            lblImagen.Text = n;           
-            
+            lblImagen.Text = n;
+
             picEntrada.ImageLocation = n;
 
-    
+
         }
 
         static void AdjustExposure(Bitmap bitmap, float exposure)
