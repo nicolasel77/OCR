@@ -3,11 +3,11 @@
   "WorkspaceRootPath": "C:\\Users\\Marcos\\Documents\\GitHub\\OCR\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{B5E69356-7150-47C4-A874-DD7C3E4F8F34}|OCR\\OCR.csproj|C:\\Users\\Marcos\\Documents\\GitHub\\OCR\\ocr\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{B5E69356-7150-47C4-A874-DD7C3E4F8F34}|OCR\\OCR.csproj|c:\\users\\marcos\\documents\\github\\ocr\\ocr\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{B5E69356-7150-47C4-A874-DD7C3E4F8F34}|OCR\\OCR.csproj|solutionrelative:ocr\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B5E69356-7150-47C4-A874-DD7C3E4F8F34}|OCR\\OCR.csproj|c:\\users\\marcos\\documents\\github\\ocr\\ocr\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{B5E69356-7150-47C4-A874-DD7C3E4F8F34}|OCR\\OCR.csproj|C:\\Users\\Marcos\\Documents\\GitHub\\OCR\\ocr\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{B5E69356-7150-47C4-A874-DD7C3E4F8F34}|OCR\\OCR.csproj|solutionrelative:ocr\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     }
   ],
@@ -30,8 +30,8 @@
               "Title": "Form1.cs [Dise\u00F1o]",
               "DocumentMoniker": "C:\\Users\\Marcos\\Documents\\GitHub\\OCR\\OCR\\Form1.cs",
               "RelativeDocumentMoniker": "OCR\\Form1.cs",
-              "ToolTip": "C:\\Users\\Marcos\\Documents\\GitHub\\OCR\\OCR\\Form1.cs [Dise\u00F1o]",
-              "RelativeToolTip": "OCR\\Form1.cs [Dise\u00F1o]",
+              "ToolTip": "C:\\Users\\Marcos\\Documents\\GitHub\\OCR\\OCR\\Form1.cs [Dise\u00F1o]*",
+              "RelativeToolTip": "OCR\\Form1.cs [Dise\u00F1o]*",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-06-04T15:00:39.613Z",
               "EditorCaption": " [Dise\u00F1o]"
@@ -42,9 +42,9 @@
               "Title": "Form1.cs",
               "DocumentMoniker": "C:\\Users\\Marcos\\Documents\\GitHub\\OCR\\OCR\\Form1.cs",
               "RelativeDocumentMoniker": "OCR\\Form1.cs",
-              "ToolTip": "C:\\Users\\Marcos\\Documents\\GitHub\\OCR\\OCR\\Form1.cs",
-              "RelativeToolTip": "OCR\\Form1.cs",
-              "ViewState": "AQIAAHgAAAAAAAAAAAAAAIcAAAAQAAAA",
+              "ToolTip": "C:\\Users\\Marcos\\Documents\\GitHub\\OCR\\OCR\\Form1.cs*",
+              "RelativeToolTip": "OCR\\Form1.cs*",
+              "ViewState": "AQIAAI8BAAAAAAAAAAAcwLABAABTAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-05-14T15:09:47.86Z",
               "EditorCaption": ""

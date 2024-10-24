@@ -42,11 +42,18 @@
             this.lblSimilitud = new System.Windows.Forms.Label();
             this.cmdDesaturar = new System.Windows.Forms.Button();
             this.cbTipo = new System.Windows.Forms.ComboBox();
+            this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.txt_prueba = new System.Windows.Forms.TextBox();
+            this.cmdPrueba = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picEntrada)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
+            this.splitContainer2.Panel1.SuspendLayout();
+            this.splitContainer2.Panel2.SuspendLayout();
+            this.splitContainer2.SuspendLayout();
             this.SuspendLayout();
             // 
             // button1
@@ -88,8 +95,7 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.BackColor = System.Drawing.SystemColors.Control;
-            this.splitContainer1.Panel2.Controls.Add(this.txtRespuestas);
-            this.splitContainer1.Panel2.Controls.Add(this.txtSalida);
+            this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
             this.splitContainer1.Size = new System.Drawing.Size(1415, 677);
             this.splitContainer1.SplitterDistance = 783;
             this.splitContainer1.SplitterWidth = 10;
@@ -113,7 +119,7 @@
             this.txtRespuestas.Location = new System.Drawing.Point(0, 0);
             this.txtRespuestas.Name = "txtRespuestas";
             this.txtRespuestas.ReadOnly = true;
-            this.txtRespuestas.Size = new System.Drawing.Size(622, 677);
+            this.txtRespuestas.Size = new System.Drawing.Size(622, 101);
             this.txtRespuestas.TabIndex = 1;
             this.txtRespuestas.Text = "";
             // 
@@ -124,7 +130,7 @@
             this.txtSalida.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtSalida.Location = new System.Drawing.Point(0, 0);
             this.txtSalida.Name = "txtSalida";
-            this.txtSalida.Size = new System.Drawing.Size(622, 677);
+            this.txtSalida.Size = new System.Drawing.Size(622, 566);
             this.txtSalida.TabIndex = 0;
             this.txtSalida.Text = "";
             // 
@@ -208,12 +214,56 @@
             this.cbTipo.Size = new System.Drawing.Size(187, 21);
             this.cbTipo.TabIndex = 8;
             // 
+            // splitContainer2
+            // 
+            this.splitContainer2.BackColor = System.Drawing.Color.Silver;
+            this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer2.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer2.Name = "splitContainer2";
+            this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer2.Panel1
+            // 
+            this.splitContainer2.Panel1.Controls.Add(this.txtRespuestas);
+            // 
+            // splitContainer2.Panel2
+            // 
+            this.splitContainer2.Panel2.Controls.Add(this.txtSalida);
+            this.splitContainer2.Size = new System.Drawing.Size(622, 677);
+            this.splitContainer2.SplitterDistance = 101;
+            this.splitContainer2.SplitterWidth = 10;
+            this.splitContainer2.TabIndex = 2;
+            // 
+            // txt_prueba
+            // 
+            this.txt_prueba.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.txt_prueba.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txt_prueba.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txt_prueba.Location = new System.Drawing.Point(924, 10);
+            this.txt_prueba.Name = "txt_prueba";
+            this.txt_prueba.Size = new System.Drawing.Size(256, 15);
+            this.txt_prueba.TabIndex = 9;
+            // 
+            // cmdPrueba
+            // 
+            this.cmdPrueba.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmdPrueba.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.cmdPrueba.Location = new System.Drawing.Point(843, 7);
+            this.cmdPrueba.Name = "cmdPrueba";
+            this.cmdPrueba.Size = new System.Drawing.Size(75, 23);
+            this.cmdPrueba.TabIndex = 10;
+            this.cmdPrueba.Text = "Prueba";
+            this.cmdPrueba.UseVisualStyleBackColor = true;
+            this.cmdPrueba.Click += new System.EventHandler(this.cmdPrueba_Click);
+            // 
             // frmInicio
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Gainsboro;
             this.ClientSize = new System.Drawing.Size(1438, 730);
+            this.Controls.Add(this.cmdPrueba);
+            this.Controls.Add(this.txt_prueba);
             this.Controls.Add(this.cbTipo);
             this.Controls.Add(this.lblSimilitud);
             this.Controls.Add(this.cmdDesaturar);
@@ -233,6 +283,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.picEntrada)).EndInit();
+            this.splitContainer2.Panel1.ResumeLayout(false);
+            this.splitContainer2.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
+            this.splitContainer2.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -254,6 +308,9 @@
         private System.Windows.Forms.Button cmdDesaturar;
         private System.Windows.Forms.RichTextBox txtRespuestas;
         private System.Windows.Forms.ComboBox cbTipo;
+        private System.Windows.Forms.SplitContainer splitContainer2;
+        private System.Windows.Forms.TextBox txt_prueba;
+        private System.Windows.Forms.Button cmdPrueba;
     }
 }
 

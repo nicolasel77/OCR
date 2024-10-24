@@ -1,16 +1,17 @@
-﻿using Emgu.CV;
-using Emgu.CV.CvEnum;
-using Emgu.CV.Structure;
-using Emgu.CV.Util;
+﻿using iText.Kernel.Pdf;
+using iText.Kernel.Pdf.Canvas.Parser;
+using iText.Kernel.Pdf.Canvas.Parser.Data;
+using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Tesseract;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Linq;
 
 namespace OCR
 {
@@ -23,13 +24,13 @@ namespace OCR
 
         private void button1_Click(object sender, EventArgs e)
         {
-            
+
 
         }
 
         private void buscar_imagen(string path)
         {
-                txtRespuestas.Text = "";
+            txtRespuestas.Text = "";
             //opnArchivo.InitialDirectory = "c:\\";
             //opnArchivo.Filter = "jpg files (*.jpg)|*.jpg|All files (*.*)|*.*";
             //opnArchivo.FilterIndex = 2;
@@ -37,19 +38,26 @@ namespace OCR
 
             //if (opnArchivo.ShowDialog() == DialogResult.OK)
             //{
-                Cursor.Current = Cursors.WaitCursor;
-                //Get the path of specified file
-                lblImagen.Text = path;
-                picEntrada.ImageLocation = lblImagen.Text;
+            Cursor.Current = Cursors.WaitCursor;
+            //Get the path of specified file
+            lblImagen.Text = path;
+            picEntrada.ImageLocation = path;
 
-                var engine = new TesseractEngine(@"D:\tessdata", "eng");
-                var image = Pix.LoadFromFile(lblImagen.Text);
-                var page = engine.Process(image);
+            var engine = new TesseractEngine(@"D:\tessdata", "eng");
+            var image = Pix.LoadFromFile(lblImagen.Text);
+            var page = engine.Process(image);
 
-                var text = page.GetText();
+            var text = page.GetText();
 
-                txtSalida.Text = text;
-                Cursor.Current = Cursors.Default;
+            text = text.Replace("\n", " ");
+            text = text.Replace(",", " ");
+            text = text.Replace(".", " ");
+            text = text.Replace(":", " ");
+            text = text.Replace("-", " ");
+            text = text.ToLower();
+
+            txtSalida.Text = text;
+            Cursor.Current = Cursors.Default;
             //}
         }
 
@@ -90,23 +98,19 @@ namespace OCR
             //Mostrar el contenido en la consola
             //txtRespuestas.Text = fileContent;
 
-
-            if (txtSalida.Text.Length > 0)
+            if (txtSalida.Text.Length > 0 && txtBuscar.Text.Length > 0)
             {
-                if (txtBuscar.Text.Length > 0)
+                string b = txtBuscar.Text.ToLower();
+                string b2 = txtSalida.Text.ToLower();
+                int t = b2.IndexOf(b);
+                if (t > -1)
                 {
-                    string b = txtBuscar.Text.ToLower();
-                    string b2 = txtSalida.Text.ToLower();
-                    int t = b2.IndexOf(b);
-                    if (t > -1)
-                    {
-                        Regex regExp = new Regex($"({b})");
+                    Regex regExp = new Regex($"({b})");
 
-                        foreach (Match match in regExp.Matches(b2))
-                        {
-                            txtSalida.Select(match.Index, match.Length);
-                            txtSalida.SelectionColor = Color.Blue;
-                        }
+                    foreach (Match match in regExp.Matches(b2))
+                    {
+                        txtSalida.Select(match.Index, match.Length);
+                        txtSalida.SelectionColor = Color.Blue;
                     }
                 }
             }
@@ -129,17 +133,13 @@ namespace OCR
             string fileContent = File.ReadAllText(filePath + ".txt");
             string d = "";
             for (int cont = 0; cont < fileContent.Count(); cont++)
-            { 
+            {
                 d = d + fileContent.Substring(cont, fileContent.IndexOf(":", cont) + 2 - cont);
                 cont = fileContent.IndexOf(":", cont) + 2;
                 //Mostrar el contenido en la consola
                 //txtRespuestas.Text = fileContent;
                 string palabra1 = fileContent.Substring(cont, fileContent.IndexOf(";", cont) - cont);
                 string palabra2 = txtSalida.Text.ToLower();
-
-                palabra2 = palabra2.Replace("\n", " ");
-                palabra2 = palabra2.Replace(",", " ");
-                palabra2 = palabra2.Replace(",", "-");
 
                 if (palabra1.Length > 0 && palabra2.Length > 0)
                 {
@@ -347,7 +347,7 @@ namespace OCR
         {
             float newValue = colorValue * exposure;
             if (newValue < 0) { newValue = 0; }
-            if (newValue > 255) { newValue = 255;}
+            if (newValue > 255) { newValue = 255; }
 
             return (byte)newValue;
         }
@@ -356,5 +356,322 @@ namespace OCR
         {
 
         }
+
+        static string[] BuscarPalabrasConContexto(string texto, string palabrasClave, int contexto)
+        {
+            // Separar el texto y las palabras clave
+            string[] palabrasTexto = texto.Split(new char[] { ' ', '.', ',' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] palabrasBuscar = palabrasClave.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            List<string> resultados = new List<string>();
+
+            // Buscar cada palabra clave en el texto
+            //foreach (string palabraClave in palabrasBuscar)
+            //{
+            for (int n_palabra = 0; n_palabra < palabrasBuscar.Length; n_palabra++)
+            {
+
+                for (int i = 0; i < palabrasTexto.Length; i++)
+                {
+                    if (palabrasTexto[i].Equals(palabrasBuscar[n_palabra], StringComparison.OrdinalIgnoreCase))
+                    {
+                        //int dalegordo = palabrasBuscar.IndexOf(palabrasBuscar, palabraClave);
+                        // Obtener las palabras en el contexto de la clave encontrada
+                        int inicio = Math.Max(0, i - contexto - palabrasBuscar.Length + (palabrasBuscar.Length - n_palabra)); // Asegura que no vaya antes del inicio del array
+                        int fin = Math.Min(palabrasTexto.Length - 1, i + contexto + palabrasBuscar.Length - 1 - n_palabra); // Asegura que no vaya después del final
+
+                        // Construir el fragmento de texto con las palabras alrededor
+                        List<string> fragmento = new List<string>();
+                        string valor = "";
+                        for (int j = inicio; j <= fin; j++)
+                        {
+                            valor += " " + palabrasTexto[j];
+                        }
+                        fragmento.Add(valor);
+                        fragmento.Add("\n\n\n");
+
+                        // Unir las palabras en un solo string y agregarlo a la lista de resultados
+                        resultados.Add(string.Join(" ", fragmento));
+                    }
+                }
+            }
+            //}
+
+            return resultados.ToArray();
+        }
+
+        private void cmdPrueba_Click(object sender, EventArgs e)
+        {
+            //                                                              txtBuscar.Text
+            string filePath = @"D:\demo\Ejemplos\Examples\Birth\Approved\" + "blanco" + @"\";
+
+            string fileContent = File.ReadAllText(filePath + "values.txt");
+
+            txtSalida.Text = leer_input(fileContent);
+
+        }
+
+        private string leer_input(string input)
+        {
+            string[] inputLines = input.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            string pattern = @"= (.*?) (\d+)%";
+
+            input = "";
+
+            foreach (string line in inputLines)
+            {
+                // Aplicar la expresión regular
+                Match match = Regex.Match(line, pattern);
+
+                if (match.Success)
+                {
+                    // Almacenar los valores temporalmente
+                    string textValue = match.Groups[1].Value.Trim();
+                    string percentageValue = match.Groups[2].Value;
+
+                    // Imprimir el resultado
+                    input += $"Texto: {textValue}, Porcentaje: {percentageValue}%";
+                }
+            }
+
+            return input;
+        }
+
+        //Formatear fechas
+        private string fecha_formateada(string f)
+        {
+            //mm = Mes, dd = día, aaaa = año, dm = nombre mes, snm = nombre mes corto, thh = sufijo ordinal(th)
+            int dia;
+            int mes;
+            int año;
+            string fechas = "mm/dd/aaaa;dd/mm/aaaa;dd-mm-aaaa;mm-dd-aaaa;dd mm aaaa;mm dd aaaa;dd.mm.aaaa;mm.dd.aaaa;dd de dm de aaaa;dd de dm de aaaa;dm dd aaaa;dd dm aaaa;thh day of dm aaaa;" +
+                "dd snm aaaa;snm dd aaaa;dd snm / snm aaaa;";
+            string entrada = "11/13/2027";
+
+            mes = Convert.ToInt32(entrada.Substring(0, entrada.IndexOf("/")));
+            dia = Convert.ToInt32(entrada.Substring(entrada.IndexOf("/") + 1, entrada.LastIndexOf("/") - entrada.IndexOf("/") - 1));
+            año = Convert.ToInt32(entrada.Substring(entrada.LastIndexOf("/") + 1));
+
+            fechas = fechas.Replace("mm", mes.ToString());
+            fechas = fechas.Replace("dd", dia.ToString());
+            fechas = fechas.Replace("aaaa", año.ToString());
+            fechas = fechas.Replace("dm", CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(mes));
+            fechas = fechas.Replace("snm", CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(mes).Substring(0, 3));
+            fechas = fechas.Replace("thh", ordinal(dia));
+
+            return fechas;
+        }
+
+        static string ordinal(int number)
+        {
+            if (number % 100 >= 11 && number % 100 <= 13)
+                return number + "th";
+
+            switch (number % 10)
+            {
+                case 1:
+                    return number + "st";
+                case 2:
+                    return number + "nd";
+                case 3:
+                    return number + "rd";
+                default:
+                    return number + "th";
+            }
+        }
+
+        //Separar imagenes de pdf
+        static void ExtractImagesFromPdf(string pdfPath, string outputPath)
+        {
+            PdfDocument pdfDoc = new PdfDocument(new PdfReader(pdfPath));
+
+            for (int i = 1; i <= pdfDoc.GetNumberOfPages(); i++)
+            {
+                PdfPage page = pdfDoc.GetPage(i);
+                var imageListener = new ImageRenderListener(outputPath);
+                var processor = new PdfCanvasProcessor(imageListener);
+                processor.ProcessPageContent(page);
+            }
+
+            Console.WriteLine("Extracción completada.");
+        }
+
+        public class ImageRenderListener : IEventListener
+        {
+            private string outputPath;
+            private int imageCounter = 1;
+
+            public ImageRenderListener(string outputPath)
+            {
+                this.outputPath = outputPath;
+            }
+
+            public void EventOccurred(IEventData data, EventType type)
+            {
+                if (type == EventType.RENDER_IMAGE)
+                {
+                    var renderInfo = (ImageRenderInfo)data;
+                    var imageObject = renderInfo.GetImage();
+
+                    if (imageObject != null)
+                    {
+                        var imageBytes = imageObject.GetImageBytes();
+                        using (var ms = new MemoryStream(imageBytes))
+                        {
+                            Image image = Image.FromStream(ms);
+                            string imagePath = GetUniqueFilePath(outputPath, $"imagen_{imageCounter++}.jpg");
+                            image.Save(imagePath, System.Drawing.Imaging.ImageFormat.Jpeg);
+                        }
+                    }
+                }
+            }
+
+            public ICollection<EventType> GetSupportedEvents()
+            {
+                return new HashSet<EventType> { EventType.RENDER_IMAGE };
+            }
+
+            private string GetUniqueFilePath(string directory, string fileName)
+            {
+                string filePath = Path.Combine(directory, fileName);
+                string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
+                string extension = Path.GetExtension(fileName);
+                int count = 1;
+
+                // Si el archivo ya existe, agregar un sufijo numérico al nombre del archivo
+                while (File.Exists(filePath))
+                {
+                    string tempFileName = $"{fileNameWithoutExtension}({count++}){extension}";
+                    filePath = Path.Combine(directory, tempFileName);
+                }
+
+                return filePath;
+            }
+
+        }
+        //
+        private void rotar_imagen()
+        {
+            // Directorio donde están las imágenes
+            string directorioImagen = @"D:\demo\" + txtBuscar.Text + @"\" + cbTipo.Text + ".jpg";
+
+            // Cargar la imagen en un objeto Bitmap
+            Bitmap imagenOriginal = new Bitmap(picEntrada.Image);
+
+            // Rotar la imagen 90 grados hacia la derecha
+            imagenOriginal.RotateFlip(RotateFlipType.Rotate90FlipNone);
+
+            // Construir el nombre de la nueva imagen rotada
+            string nombreImagenRotada = directorioImagen.Replace(".jpg", "editada.jpg");
+
+            // Guardar la copia con la imagen rotada
+            imagenOriginal.Save(nombreImagenRotada);
+
+            picEntrada.ImageLocation = nombreImagenRotada;
+        }
+
+        private void Vieja_demo()
+        {
+            //txtRespuestas.Text = "";
+
+            //// Mostrar los resultados
+            //foreach (string resultado in resultados)
+            //{
+            //    txtRespuestas.Text += resultado + "\n";
+            //}
+
+            //txtSalida.SelectAll();
+            //txtSalida.SelectionColor = Color.Black;
+            //txtSalida.DeselectAll();
+
+            // Leer todo el contenido del archivo y asignarlo a una variable string
+
+            //Mostrar el contenido en la consola
+            //txtRespuestas.Text = fileContent;
+
+            //if (txtSalida.Text.Length > 0 && txtBuscar.Text.Length > 0)
+            //{
+            //    string b = txtBuscar.Text.ToLower();
+            //    string b2 = txtSalida.Text.ToLower();
+            //    int t = b2.IndexOf(b);
+            //    if (t > -1)
+            //    {
+            //        Regex regExp = new Regex($"({b})");
+
+            //        foreach (Match match in regExp.Matches(b2))
+            //        {
+            //            txtSalida.Select(match.Index, match.Length);
+            //            txtSalida.SelectionColor = Color.Blue;
+            //        }
+            //    }
+            //}
+        }
+
+        //Busca un listado de posibles resultados y compara cual es el más apto
+        private void Busqueda_de_Resultados()
+        {
+            string[] resultados = BuscarPalabrasConContexto(txtSalida.Text, txt_prueba.Text, 2);
+
+            Buscar_matcheos(resultados);
+        }
+
+        private void Buscar_matcheos(string[] candidatos)
+        {
+            string palabra1 = txt_prueba.Text;
+
+            if (palabra1.Length > 0 && candidatos.Length > 0)
+            {
+                List<string> list1 = new List<string>(palabra1.Split(' '));
+
+                //Separo las palabras encontradas por el OCR
+                //Más Adelante la idea es que la devuelva la IA directo
+
+                List<string> list2;
+
+                double mas_proxima = 0;
+                double nva_comparacion;
+                int id_mas_prox = 0;
+                int distancia;
+                double similitud = 0;
+                string mejor_match = "";
+
+                for (int candidato = 0; candidato < candidatos.Length; candidato++)
+                {
+                    list2 = new List<string>(candidatos[candidato].Split(' '));
+
+                    for (int i = 0; i < list1.Count; i++)
+                    {
+                        for (int j = 0; j < list2.Count; j++)
+                        {
+                            distancia = CalcularDistanciaLevenshtein(list1[i], list2[j]);
+                            nva_comparacion = CalcularSimilitud(list1[i], list2[j], distancia);
+                            if (nva_comparacion > mas_proxima) { mas_proxima = nva_comparacion; id_mas_prox = j; }
+                        }
+                        distancia = CalcularDistanciaLevenshtein(list1[i], list2[id_mas_prox]);
+                        similitud += CalcularSimilitud(list1[i], list2[id_mas_prox], distancia);
+                        mejor_match = mejor_match + " " + list2[id_mas_prox];
+                        list2.Remove(list2[id_mas_prox]);
+
+                        mas_proxima = 0;
+                        id_mas_prox = 0;
+                    }
+
+                    mejor_match = mejor_match.Substring(1);
+
+                    distancia = CalcularDistanciaLevenshtein(palabra1, mejor_match);
+                    similitud = CalcularSimilitud(palabra1, mejor_match, distancia);
+                    //label3.Text = mejor_match;
+
+                    lblSimilitud.Text = $"La similitud es del: {similitud * 100:0.00}%";
+                    txtRespuestas.Text += candidatos[candidato] + mejor_match + $" {similitud * 100:0.00}% \n";
+
+                    mejor_match = "";
+                    similitud = 0;
+                }
+            }
+            else { lblSimilitud.Text = "No hay texto para comparar"; }
+        }
+
+
     }
 }
