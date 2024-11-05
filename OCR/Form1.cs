@@ -175,10 +175,11 @@ namespace OCR
                     case "=":
                         if (resultado.IndexOf(" ") > -1)
                         {
-
+                            //Buscar_matcheos(BuscarPalabrasConContexto());
                         }
                         else
                         {
+
                         }
                         Console.WriteLine("Operador de igualdad");
                         break;
@@ -375,8 +376,6 @@ namespace OCR
             List<string> resultados = new List<string>();
 
             // Buscar cada palabra clave en el texto
-            //foreach (string palabraClave in palabrasBuscar)
-            //{
             for (int n_palabra = 0; n_palabra < palabrasBuscar.Length; n_palabra++)
             {
 
@@ -384,7 +383,6 @@ namespace OCR
                 {
                     if (palabrasTexto[i].Equals(palabrasBuscar[n_palabra], StringComparison.OrdinalIgnoreCase))
                     {
-                        //int dalegordo = palabrasBuscar.IndexOf(palabrasBuscar, palabraClave);
                         // Obtener las palabras en el contexto de la clave encontrada
                         int inicio = Math.Max(0, i - contexto - palabrasBuscar.Length + (palabrasBuscar.Length - n_palabra)); // Asegura que no vaya antes del inicio del array
                         int fin = Math.Min(palabrasTexto.Length - 1, i + contexto + palabrasBuscar.Length - 1 - n_palabra); // Asegura que no vaya después del final
@@ -404,18 +402,16 @@ namespace OCR
                     }
                 }
             }
-            //}
 
             return resultados.ToArray();
         }
 
-        private void Buscar_matcheos(string[] candidatos)
+        private void Buscar_matcheos(string[] candidatos, string valor)
         {
-            string palabra1 = txt_prueba.Text;
 
-            if (palabra1.Length > 0 && candidatos.Length > 0)
+            if (valor.Length > 0 && candidatos.Length > 0)
             {
-                List<string> list1 = new List<string>(palabra1.Split(' '));
+                List<string> list1 = new List<string>(valor.Split(' '));
 
                 //Separo las palabras encontradas por el OCR
                 //Más Adelante la idea es que la devuelva la IA directo
@@ -452,8 +448,8 @@ namespace OCR
 
                     mejor_match = mejor_match.Substring(1);
 
-                    distancia = CalcularDistanciaLevenshtein(palabra1, mejor_match);
-                    similitud = CalcularSimilitud(palabra1, mejor_match, distancia);
+                    distancia = CalcularDistanciaLevenshtein(valor, mejor_match);
+                    similitud = CalcularSimilitud(valor, mejor_match, distancia);
                     //label3.Text = mejor_match;
 
                     lblSimilitud.Text = $"La similitud es del: {similitud * 100:0.00}%";
@@ -467,14 +463,9 @@ namespace OCR
         }
 
         //Comparacion individual
-        private void Buscar_resultado()
-        {           //txtSalida.SelectAll();
-            //txtSalida.SelectionColor = Color.Black;
-            //txtSalida.DeselectAll();
-            string filePath = @"D:\demo\" + txtBuscar.Text + @"\" + cbTipo.Text;
-
+        private string Buscar_resultado(string texto, string busqueda)
+        {           
             // Leer todo el contenido del archivo y asignarlo a una variable string
-            buscar_imagen(filePath + ".jpg");
             string fileContent = File.ReadAllText(filePath + ".txt");
             string d = "";
             for (int cont = 0; cont < fileContent.Count(); cont++)
@@ -532,7 +523,7 @@ namespace OCR
                 d = d + "\n";
                 cont = fileContent.IndexOf(";", cont) + 1;
             }
-            txtRespuestas.Text = d;
+            return d;
         }
 
         #endregion
@@ -623,26 +614,16 @@ namespace OCR
 
         #endregion
 
-        #region Funciones para la demo
-
-        private void buscar_imagen(string path)
+        #region Varias
+        private Pix obtener_imagen(string path)
         {
-            txtRespuestas.Text = "";
-            //opnArchivo.InitialDirectory = "c:\\";
-            //opnArchivo.Filter = "jpg files (*.jpg)|*.jpg|All files (*.*)|*.*";
-            //opnArchivo.FilterIndex = 2;
-            //opnArchivo.RestoreDirectory = true;
+            return Pix.LoadFromFile(path);
+        }
 
-            //if (opnArchivo.ShowDialog() == DialogResult.OK)
-            //{
-            Cursor.Current = Cursors.WaitCursor;
-            //Get the path of specified file
-            lblImagen.Text = path;
-            picEntrada.ImageLocation = path;
-
+        private string leer_imagen(Pix img)
+        {
             var engine = new TesseractEngine(@"D:\tessdata", "eng");
-            var image = Pix.LoadFromFile(lblImagen.Text);
-            var page = engine.Process(image);
+            var page = engine.Process(img);
 
             var text = page.GetText();
 
@@ -653,81 +634,9 @@ namespace OCR
             text = text.Replace("-", " ");
             text = text.ToLower();
 
-            txtSalida.Text = text;
-            Cursor.Current = Cursors.Default;
-            //}
-        }
-
-        private void pintar()
-        {
-            //txtSalida.SelectAll();
-            //txtSalida.SelectionColor = Color.Black;
-            //txtSalida.DeselectAll();
-            string filePath = @"D:\demo\" + txtBuscar.Text + @"\" + cbTipo.Text;
-
-            // Leer todo el contenido del archivo y asignarlo a una variable string
-            buscar_imagen(filePath + ".jpg");
-            string fileContent = File.ReadAllText(filePath + ".txt");
-
-            //Mostrar el contenido en la consola
-            //txtRespuestas.Text = fileContent;
-
-            if (txtSalida.Text.Length > 0 && txtBuscar.Text.Length > 0)
-            {
-                string b = txtBuscar.Text.ToLower();
-                string b2 = txtSalida.Text.ToLower();
-                int t = b2.IndexOf(b);
-                if (t > -1)
-                {
-                    Regex regExp = new Regex($"({b})");
-
-                    foreach (Match match in regExp.Matches(b2))
-                    {
-                        txtSalida.Select(match.Index, match.Length);
-                        txtSalida.SelectionColor = Color.Blue;
-                    }
-                }
-            }
+            return text;
         }
 
         #endregion
-
-        private void Vieja_demo()
-        {
-            //txtRespuestas.Text = "";
-
-            //// Mostrar los resultados
-            //foreach (string resultado in resultados)
-            //{
-            //    txtRespuestas.Text += resultado + "\n";
-            //}
-
-            //txtSalida.SelectAll();
-            //txtSalida.SelectionColor = Color.Black;
-            //txtSalida.DeselectAll();
-
-            // Leer todo el contenido del archivo y asignarlo a una variable string
-
-            //Mostrar el contenido en la consola
-            //txtRespuestas.Text = fileContent;
-
-            //if (txtSalida.Text.Length > 0 && txtBuscar.Text.Length > 0)
-            //{
-            //    string b = txtBuscar.Text.ToLower();
-            //    string b2 = txtSalida.Text.ToLower();
-            //    int t = b2.IndexOf(b);
-            //    if (t > -1)
-            //    {
-            //        Regex regExp = new Regex($"({b})");
-
-            //        foreach (Match match in regExp.Matches(b2))
-            //        {
-            //            txtSalida.Select(match.Index, match.Length);
-            //            txtSalida.SelectionColor = Color.Blue;
-            //        }
-            //    }
-            //}
-        }
-
     }
 }
