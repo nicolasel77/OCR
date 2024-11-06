@@ -8,8 +8,6 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Tesseract;
 
@@ -28,74 +26,16 @@ namespace OCR
 
         private void cmdBuscar_Click(object sender, EventArgs e)
         {
-            pintar();
         }
-       
+
         private void txtBuscar_TextChanged(object sender, EventArgs e)
         {
         }
 
         private void cmdComparar_Click(object sender, EventArgs e)
         {
-            Buscar_resultado();
+            txtRespuestas.Text = Buscar_resultado(txtSalida.Text, txt_prueba.Text);
         }
-
-        //private void cmdPrueba_firma_Click(object sender, EventArgs e)
-        //{
-        //    string imagePath = lblImagen.Text;
-
-        //    // Cargar la imagen
-        //    var image = Image.FromFile(lblImagen.Text);
-        //    Mat img = CvInvoke.Imread(image, ImreadModes.Color);
-
-        //    if (img.IsEmpty)
-        //    {
-        //        lblRespuesta.Text = "Error: No se pudo cargar la imagen.";
-        //        return;
-        //    }
-
-        //    // Convertir a escala de grises
-        //    Mat gray = new Mat();
-        //    CvInvoke.CvtColor(img, gray, ColorConversion.Bgr2Gray);
-
-        //    // Aplicar umbralización
-        //    Mat thresh = new Mat();
-        //    CvInvoke.Threshold(gray, thresh, 127, 255, ThresholdType.BinaryInv);
-
-        //    // Encontrar contornos
-        //    using (VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint())
-        //    {
-        //        Mat hierarchy = new Mat();
-        //        CvInvoke.FindContours(thresh, contours, hierarchy, RetrType.External, ChainApproxMethod.ChainApproxSimple);
-
-        //        // Dibujar contornos y verificar si hay firmas
-        //        bool hasSignature = false;
-        //        for (int i = 0; i < contours.Size; i++)
-        //        {
-        //            double contourArea = CvInvoke.ContourArea(contours[i]);
-        //            if (contourArea > 500) // Este valor debe ajustarse según tus necesidades
-        //            {
-        //                hasSignature = true;
-        //                CvInvoke.DrawContours(img, contours, i, new MCvScalar(0, 0, 255), 2);
-        //            }
-        //        }
-
-        //        // Guardar la imagen con los contornos dibujados
-        //        string outputPath = "path_to_output_image.jpg";
-        //        img.Save(outputPath);
-
-        //        if (hasSignature)
-        //        {
-        //            lblRespuesta.Text = "La imagen contiene una firma.";
-        //        }
-        //        else
-        //        {
-        //            lblRespuesta.Text = "No se detectaron firmas en la imagen.";
-        //        }
-        //    }
-        //}
-
-
 
         private void frmInicio_Load(object sender, EventArgs e)
         {
@@ -103,15 +43,19 @@ namespace OCR
         }
 
 
-
         private void cmdPrueba_Click(object sender, EventArgs e)
         {
             //                                                              txtBuscar.Text
             string filePath = @"D:\demo\Ejemplos\Examples\Birth\Approved\" + "blanco" + @"\";
 
-            string fileContent = File.ReadAllText(filePath + "values.txt");
+            picEntrada.Image = obtener_imagen(filePath + "image.jpg");
 
-            txtSalida.Text = leer_input(fileContent);
+            txtSalida.Text = leer_imagen(Pix.LoadFromFile(filePath + "image.jpg"));
+
+            ////lee el txt de los resultados
+            //string fileContent = File.ReadAllText(filePath + "values.txt");
+
+            //txtSalida.Text = leer_input(fileContent);
 
         }
 
@@ -365,7 +309,7 @@ namespace OCR
         {
             string[] resultados = BuscarPalabrasConContexto(texto, busqueda, 2);
 
-            Buscar_matcheos(resultados);
+            //Buscar_matcheos(resultados);
         }
 
         static string[] BuscarPalabrasConContexto(string texto, string palabrasClave, int contexto)
@@ -463,67 +407,41 @@ namespace OCR
         }
 
         //Comparacion individual
-        private string Buscar_resultado(string texto, string busqueda)
-        {           
+        private string Buscar_resultado(string texto, string resultado)
+        {
             // Leer todo el contenido del archivo y asignarlo a una variable string
-            string fileContent = File.ReadAllText(filePath + ".txt");
-            string d = "";
-            for (int cont = 0; cont < fileContent.Count(); cont++)
+            //string fileContent = File.ReadAllText(filePath + ".txt");
+
+            string palabra2 = texto.ToLower();
+            string mejor_match = "";
+
+            if (resultado.Length > 0 && palabra2.Length > 0)
             {
-                d = d + fileContent.Substring(cont, fileContent.IndexOf(":", cont) + 2 - cont);
-                cont = fileContent.IndexOf(":", cont) + 2;
-                //Mostrar el contenido en la consola
-                //txtRespuestas.Text = fileContent;
-                string palabra1 = fileContent.Substring(cont, fileContent.IndexOf(";", cont) - cont);
-                string palabra2 = txtSalida.Text.ToLower();
+                //Separo las palabras encontradas por el OCR
+                //Más Adelante la idea es que la devuelva la IA directo
 
-                if (palabra1.Length > 0 && palabra2.Length > 0)
+                List<string> list2 = new List<string>(palabra2.Split(' '));
+
+                double mas_proxima = 0;
+                double nva_comparacion;
+                int distancia;
+                double similitud;
+
+                for (int j = 0; j < list2.Count; j++)
                 {
-                    List<string> list1 = new List<string>(palabra1.Split(' '));
-
-                    //Separo las palabras encontradas por el OCR
-                    //Más Adelante la idea es que la devuelva la IA directo
-
-                    List<string> list2 = new List<string>(palabra2.Split(' '));
-
-                    double mas_proxima = 0;
-                    double nva_comparacion;
-                    int id_mas_prox = 0;
-                    int distancia;
-                    double similitud = 0;
-                    string mejor_match = "";
-
-                    for (int i = 0; i < list1.Count; i++)
-                    {
-                        for (int j = 0; j < list2.Count; j++)
-                        {
-                            distancia = CalcularDistanciaLevenshtein(list1[i], list2[j]);
-                            nva_comparacion = CalcularSimilitud(list1[i], list2[j], distancia);
-                            if (nva_comparacion > mas_proxima) { mas_proxima = nva_comparacion; id_mas_prox = j; }
-                        }
-                        distancia = CalcularDistanciaLevenshtein(list1[i], list2[id_mas_prox]);
-                        similitud += CalcularSimilitud(list1[i], list2[id_mas_prox], distancia);
-                        mejor_match = mejor_match + " " + list2[id_mas_prox];
-                        list2.Remove(list2[id_mas_prox]);
-
-                        mas_proxima = 0;
-                        id_mas_prox = 0;
-                    }
-
-                    mejor_match = mejor_match.Substring(1);
-
-                    distancia = CalcularDistanciaLevenshtein(palabra1, mejor_match);
-                    similitud = CalcularSimilitud(palabra1, mejor_match, distancia);
-                    //label3.Text = mejor_match;
-
-                    lblSimilitud.Text = $"La similitud es del: {similitud * 100:0.00}%";
-                    d = d + mejor_match + $" {similitud * 100:0.00}%";
+                    distancia = CalcularDistanciaLevenshtein(resultado, list2[j]);
+                    nva_comparacion = CalcularSimilitud(resultado, list2[j], distancia);
+                    if (nva_comparacion > mas_proxima) { mas_proxima = nva_comparacion; mejor_match = list2[j]; }
                 }
-                else { lblSimilitud.Text = "No hay texto para comparar"; }
-                d = d + "\n";
-                cont = fileContent.IndexOf(";", cont) + 1;
+
+                distancia = CalcularDistanciaLevenshtein(resultado, mejor_match);
+                similitud = CalcularSimilitud(resultado, mejor_match, distancia);
+
+                mejor_match += $" {similitud * 100:0.00}%";
             }
-            return d;
+            else { lblSimilitud.Text = "No hay texto para comparar"; }
+
+            return mejor_match;
         }
 
         #endregion
@@ -615,9 +533,9 @@ namespace OCR
         #endregion
 
         #region Varias
-        private Pix obtener_imagen(string path)
+        private Image obtener_imagen(string path)
         {
-            return Pix.LoadFromFile(path);
+            return Image.FromFile(path);
         }
 
         private string leer_imagen(Pix img)
