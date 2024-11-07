@@ -34,7 +34,7 @@ namespace OCR
 
         private void cmdComparar_Click(object sender, EventArgs e)
         {
-            txtRespuestas.Text = Buscar_resultado(txtSalida.Text, txt_prueba.Text);
+            txtRespuestas.Text = Buscar_resultado(txtSalida.Text, txt_prueba.Text).ToString();
         }
 
         private void frmInicio_Load(object sender, EventArgs e)
@@ -48,20 +48,34 @@ namespace OCR
             //                                                              txtBuscar.Text
             string filePath = @"D:\demo\Ejemplos\Examples\Birth\Approved\" + "blanco" + @"\";
 
-            picEntrada.Image = obtener_imagen(filePath + "image.jpg");
+            //picEntrada.Image = obtener_imagen(filePath + "image.jpg");
 
-            txtSalida.Text = leer_imagen(Pix.LoadFromFile(filePath + "image.jpg"));
+            //txtSalida.Text = leer_imagen(Pix.LoadFromFile(filePath + "image.jpg"));
 
             ////lee el txt de los resultados
-            //string fileContent = File.ReadAllText(filePath + "values.txt");
+            string fileContent = File.ReadAllText(filePath + "values.txt");
 
-            //txtSalida.Text = leer_input(fileContent);
+            txtSalida.Text = leer_input(fileContent, obtener_imagen(filePath + "image.jpg"));
 
         }
 
-        private string leer_input(string input)
+        private string leer_input(string input, object archivo)
         {
-            // Dividir el string en líneas usando saltos de línea
+            if (archivo is Image)
+            {
+                Image image = (Image)archivo;
+                return leer_input_imagen(input, image);
+            }
+            else //Acá debería leer el pdf
+            { return leer_input_pdf(input, archivo); }
+        }
+
+        private string leer_input_imagen(string input, Image foto_doc)
+        {
+            //Leer el archivo
+            string texto = leer_imagen(PixConverter.ToPix(new Bitmap(foto_doc)));
+
+            // Dividir el input en cada entrada usando los saltos de línea
             string[] inputLines = input.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
             input = "";
@@ -75,20 +89,72 @@ namespace OCR
                 i = line.IndexOf(":") + 2;
 
                 string operatorSign = line.Substring(i, line.IndexOf(" ", i) - i);
-                i = line.IndexOf(" ", i + 1);
+                i = line.IndexOf(" ", i + 1) + 1;
 
-                string textValue = line.Substring(i, line.IndexOf(",", i) - i);
-                i = line.IndexOf(",", i + 1);
+                string resultado = line.Substring(i, line.IndexOf(",", i) - i);
+                i = line.IndexOf(",", i) + 2;
 
                 string percentageValue = line.Substring(i, line.Length - i - 1);
 
                 // Imprimir el resultado
-                input += $"{fieldName}: ";
+                double match_percent = Matcheo(operatorSign, resultado, texto);
+                if (operatorSign == "!=")
+                {
+                    if (match_percent >= Convert.ToDouble(percentageValue.Substring(0, percentageValue.Length - 1)))
+                    { input += $"{fieldName}: Rechazado {match_percent:0.00}%\n"; }
+                    else { input += $"{fieldName}: Aprobado {match_percent:0.00}%\n"; }
+                }
+                else
+                {
+                    if (match_percent >= Convert.ToDouble(percentageValue.Substring(0, percentageValue.Length - 1)))
+                    { input += $"{fieldName}: Aprobado {match_percent:0.00}%\n"; }
+                    else { input += $"{fieldName}: Rechazado {match_percent:0.00}%\n"; }
+                }
             }
             return input;
         }
 
-        private bool Matcheo(string operador, string resultado, string porcentaje)
+        private string leer_input_pdf(string input, object archivo)
+        {
+            ////Leer el archivo
+            //string texto;
+
+            //if (archivo is Image)
+            //{
+            //    Image image = (Image)archivo;
+            //    texto = leer_imagen(PixConverter.ToPix(new Bitmap(image)));
+            //}
+            //else //Acá debería leer el pdf
+            //{ return ""; }
+
+            //// Dividir el string en líneas usando saltos de línea
+            //string[] inputLines = input.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            //input = "";
+
+            //int i = 0;
+
+            //foreach (string line in inputLines)
+            //{
+            //    // Asignar los valores capturados a las variables correspondientes
+            //    string fieldName = line.Substring(0, line.IndexOf(":"));
+            //    i = line.IndexOf(":") + 2;
+
+            //    string operatorSign = line.Substring(i, line.IndexOf(" ", i) - i);
+            //    i = line.IndexOf(" ", i + 1);
+
+            //    string resultado = line.Substring(i, line.IndexOf(",", i) - i);
+            //    i = line.IndexOf(",", i) + 2;
+
+            //    string percentageValue = line.Substring(i, line.Length - i - 1);
+
+            //    // Imprimir el resultado
+            //    Matcheo(operatorSign, resultado, percentageValue, texto);
+            //}
+            return input;
+        }
+
+        private double Matcheo(string operador, string resultado, string texto)
         {
 
             if (DateTime.TryParseExact(resultado, "MM/dd/aaaa", CultureInfo.GetCultureInfo("en-US"), DateTimeStyles.None, out DateTime dateValue))
@@ -110,33 +176,15 @@ namespace OCR
                     case ">":
                         Console.WriteLine("Operador menor o igual");
                         break;
-                }
+                } return 0;
             }
             else
             {
-                switch (operador)
-                {
-                    case "=":
-                        if (resultado.IndexOf(" ") > -1)
-                        {
-                            //Buscar_matcheos(BuscarPalabrasConContexto());
-                        }
-                        else
-                        {
-
-                        }
-                        Console.WriteLine("Operador de igualdad");
-                        break;
-                    case "!=":
-                        Console.WriteLine("Operador de desigualdad");
-                        break;
-                    default:
-                        Console.WriteLine("Operador no reconocido");
-                        break;
-                }
+                if (resultado.IndexOf(" ") > -1 && resultado.Length > 1)
+                { return Buscar_matcheo_varias_p(texto, resultado); }
+                else
+                { return Buscar_resultado(texto, resultado); }
             }
-
-            return true;
         }
 
 
@@ -350,6 +398,44 @@ namespace OCR
             return resultados.ToArray();
         }
 
+        private double Buscar_matcheo_varias_p(string texto, string valor)
+        {
+            //Hago un listado de palabras a buscar y otro de palabras en el texto
+
+            List<string> list1 = new List<string>(valor.Split(' '));
+            List<string> list2 = new List<string>(texto.Split(' '));
+
+            double mas_proxima = 0;
+            double nva_comparacion;
+            int id_mas_prox = 0;
+            int distancia;
+            double similitud = 0;
+            string mejor_match = "";
+
+            for (int i = 0; i < list1.Count; i++)
+            {
+                for (int j = 0; j < list2.Count; j++)
+                {
+                    distancia = CalcularDistanciaLevenshtein(list1[i], list2[j]);
+                    nva_comparacion = CalcularSimilitud(list1[i], list2[j], distancia);
+                    if (nva_comparacion > mas_proxima) { mas_proxima = nva_comparacion; id_mas_prox = j; }
+                }
+                distancia = CalcularDistanciaLevenshtein(list1[i], list2[id_mas_prox]);
+                similitud += CalcularSimilitud(list1[i], list2[id_mas_prox], distancia);
+                mejor_match += list2[id_mas_prox] + " ";
+                list2.Remove(list2[id_mas_prox]);
+
+                mas_proxima = 0;
+                id_mas_prox = 0;
+            }
+
+            mejor_match = mejor_match.Substring(0, mejor_match.Length - 1);
+
+            distancia = CalcularDistanciaLevenshtein(valor, mejor_match);
+
+            return CalcularSimilitud(valor, mejor_match, distancia) * 100;
+        }
+
         private void Buscar_matcheos(string[] candidatos, string valor)
         {
 
@@ -407,10 +493,9 @@ namespace OCR
         }
 
         //Comparacion individual
-        private string Buscar_resultado(string texto, string resultado)
+        private double Buscar_resultado(string texto, string resultado)
         {
             // Leer todo el contenido del archivo y asignarlo a una variable string
-            //string fileContent = File.ReadAllText(filePath + ".txt");
 
             string palabra2 = texto.ToLower();
             string mejor_match = "";
@@ -425,7 +510,6 @@ namespace OCR
                 double mas_proxima = 0;
                 double nva_comparacion;
                 int distancia;
-                double similitud;
 
                 for (int j = 0; j < list2.Count; j++)
                 {
@@ -435,13 +519,10 @@ namespace OCR
                 }
 
                 distancia = CalcularDistanciaLevenshtein(resultado, mejor_match);
-                similitud = CalcularSimilitud(resultado, mejor_match, distancia);
 
-                mejor_match += $" {similitud * 100:0.00}%";
+                return CalcularSimilitud(resultado, mejor_match, distancia) * 100;
             }
-            else { lblSimilitud.Text = "No hay texto para comparar"; }
-
-            return mejor_match;
+            else { return 0; }
         }
 
         #endregion
