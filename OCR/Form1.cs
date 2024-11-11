@@ -34,7 +34,20 @@ namespace OCR
 
         private void cmdComparar_Click(object sender, EventArgs e)
         {
-            txtRespuestas.Text = Buscar_resultado(txtSalida.Text, txt_prueba.Text).ToString();
+            string texto_actual = leer_imagen(PixConverter.ToPix(new Bitmap(picEntrada.Image)));
+            int posicion_correcta = 0;
+            for (int i = 1; i < 4; i++)
+            {
+                string nvo_texto = leer_imagen(PixConverter.ToPix(new Bitmap(rotar_imagen(picEntrada.Image, i))));
+
+                if (nvo_texto.Length >  texto_actual.Length)
+                { 
+                    texto_actual = nvo_texto; 
+                    posicion_correcta = i;
+                }
+            }
+
+            picEntrada.Image = rotar_imagen(picEntrada.Image, posicion_correcta);
         }
 
         private void frmInicio_Load(object sender, EventArgs e)
@@ -45,10 +58,9 @@ namespace OCR
 
         private void cmdPrueba_Click(object sender, EventArgs e)
         {
-            //                                                              txtBuscar.Text
             string filePath = @"D:\demo\Ejemplos\Examples\Birth\Approved\" + "blanco" + @"\";
 
-            //picEntrada.Image = obtener_imagen(filePath + "image.jpg");
+            picEntrada.Image = obtener_imagen(filePath + "image.jpg");
 
             //txtSalida.Text = leer_imagen(Pix.LoadFromFile(filePath + "image.jpg"));
 
@@ -79,8 +91,7 @@ namespace OCR
             string[] inputLines = input.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
             input = "";
-
-            int i = 0;
+            int i;
 
             foreach (string line in inputLines)
             {
@@ -157,13 +168,13 @@ namespace OCR
         private double Matcheo(string operador, string resultado, string texto)
         {
 
-            if (DateTime.TryParseExact(resultado, "MM/dd/aaaa", CultureInfo.GetCultureInfo("en-US"), DateTimeStyles.None, out DateTime dateValue))
+            if (DateTime.TryParseExact(resultado, "MM/dd/yyyy", CultureInfo.GetCultureInfo("en-US"), DateTimeStyles.None, out DateTime dateValue))
             {
                 switch (operador)
                 {
                     case "=":
-                        Console.WriteLine("Operador de igualdad");
-                        break;
+                    case "!=":
+                        return Buscar_matcheo_fechas(texto, resultado);
                     case ">=":
                         Console.WriteLine("Operador mayor o igual");
                         break;
@@ -176,7 +187,8 @@ namespace OCR
                     case ">":
                         Console.WriteLine("Operador menor o igual");
                         break;
-                } return 0;
+                }
+                return 0;
             }
             else
             {
@@ -260,24 +272,12 @@ namespace OCR
         #endregion
 
         #region Editados
-        private void rotar_imagen()
+        private Image rotar_imagen(Image image, int rotaciones)
         {
-            // Directorio donde están las imágenes
-            string directorioImagen = @"D:\demo\" + txtBuscar.Text + @"\" + cbTipo.Text + ".jpg";
+            for (int i = 0; i < rotaciones; i++)
+            { image.RotateFlip(RotateFlipType.Rotate90FlipNone); }
 
-            // Cargar la imagen en un objeto Bitmap
-            Bitmap imagenOriginal = new Bitmap(picEntrada.Image);
-
-            // Rotar la imagen 90 grados hacia la derecha
-            imagenOriginal.RotateFlip(RotateFlipType.Rotate90FlipNone);
-
-            // Construir el nombre de la nueva imagen rotada
-            string nombreImagenRotada = directorioImagen.Replace(".jpg", "editada.jpg");
-
-            // Guardar la copia con la imagen rotada
-            imagenOriginal.Save(nombreImagenRotada);
-
-            picEntrada.ImageLocation = nombreImagenRotada;
+            return image;
         }
 
         //Desaturar
@@ -352,13 +352,6 @@ namespace OCR
         #endregion
 
         #region Comparaciones
-        //Busca un listado de posibles resultados y compara cual es el más apto
-        private void Busqueda_de_Resultados(string texto, string busqueda)
-        {
-            string[] resultados = BuscarPalabrasConContexto(texto, busqueda, 2);
-
-            //Buscar_matcheos(resultados);
-        }
 
         static string[] BuscarPalabrasConContexto(string texto, string palabrasClave, int contexto)
         {
@@ -434,6 +427,43 @@ namespace OCR
             distancia = CalcularDistanciaLevenshtein(valor, mejor_match);
 
             return CalcularSimilitud(valor, mejor_match, distancia) * 100;
+        }
+
+        private double Buscar_matcheo_fechas(string texto, string valor)
+        {
+            //Busco la fecha con el formato común y su variación al español
+            if (Buscar_resultado(texto, valor) >= 80)
+            { return Buscar_resultado(texto, valor); }
+            else if (Buscar_resultado(texto, DateTime.ParseExact(valor, "MM/dd/yyyy", CultureInfo.GetCultureInfo("en-US")).ToString("dd/MM/yyyy")) >= 80)
+            { return Buscar_resultado(texto, DateTime.ParseExact(valor, "MM/dd/yyyy", CultureInfo.GetCultureInfo("en-US")).ToString("dd/MM/yyyy")); }
+            else
+            {
+                //Formateo la fecha a distintos formatos posibles
+                valor = fecha_formateada(valor).ToLower();
+
+                int formato_encontrado = 0;
+                double valor_de_formato = 0;
+                string candidato_encontrado = "";
+
+                //Hago un listado de resultados a buscar y otro de posibles candidatos en el texto, luego me quedo con el más óptimo y devuelvo su distancia de levenshtein
+                List<string> list1 = new List<string>(valor.Split(';'));
+
+                for (int i = 0; i < list1.Count; i++)
+                {
+                    List<string> candidatos = new List<string>(BuscarPalabrasConContexto(texto, list1[i], 2));
+                    foreach (string candidato in candidatos)
+                    {
+                        if (Buscar_matcheo_varias_p(candidato, list1[i]) > valor_de_formato)
+                        {
+                            valor_de_formato = Buscar_matcheo_varias_p(candidato, list1[i]);
+                            formato_encontrado = i;
+                            candidato_encontrado = candidato;
+                        }
+                    }
+                }
+
+                return Buscar_matcheo_varias_p(candidato_encontrado, list1[formato_encontrado]);
+            }
         }
 
         private void Buscar_matcheos(string[] candidatos, string valor)
@@ -569,15 +599,16 @@ namespace OCR
 
         #region Formateos
         //Formatear fechas
-        private string fecha_formateada(string f)
+        private string fecha_formateada(string entrada)
         {
+
             //mm = Mes, dd = día, aaaa = año, dm = nombre mes, snm = nombre mes corto, thh = sufijo ordinal(th)
             int dia;
             int mes;
             int año;
-            string fechas = "mm/dd/aaaa;dd/mm/aaaa;dd-mm-aaaa;mm-dd-aaaa;dd mm aaaa;mm dd aaaa;dd.mm.aaaa;mm.dd.aaaa;dd de dm de aaaa;dd de dm de aaaa;dm dd aaaa;dd dm aaaa;thh day of dm aaaa;" +
+            string fechas = "mm/dd/aaaa;dd/mm/aaaa;dd mm aaaa;mm dd aaaa;dd de dm de aaaa;dd de dm de aaaa;dm dd aaaa;dd dm aaaa;thh day of dm aaaa;" +
                 "dd snm aaaa;snm dd aaaa;dd snm / snm aaaa;";
-            string entrada = "11/13/2027";
+
 
             mes = Convert.ToInt32(entrada.Substring(0, entrada.IndexOf("/")));
             dia = Convert.ToInt32(entrada.Substring(entrada.IndexOf("/") + 1, entrada.LastIndexOf("/") - entrada.IndexOf("/") - 1));
@@ -586,8 +617,8 @@ namespace OCR
             fechas = fechas.Replace("mm", mes.ToString());
             fechas = fechas.Replace("dd", dia.ToString());
             fechas = fechas.Replace("aaaa", año.ToString());
-            fechas = fechas.Replace("dm", CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(mes));
-            fechas = fechas.Replace("snm", CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(mes).Substring(0, 3));
+            fechas = fechas.Replace("dm", CultureInfo.GetCultureInfo("en-US").DateTimeFormat.GetMonthName(mes));
+            fechas = fechas.Replace("snm", CultureInfo.GetCultureInfo("en-US").DateTimeFormat.GetMonthName(mes).Substring(0, 3));
             fechas = fechas.Replace("thh", ordinal(dia));
 
             return fechas;
