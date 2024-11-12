@@ -18,19 +18,23 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 2,
           "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "Form1.cs [Design]",
+              "Title": "Form1.cs [Dise\u00F1o]",
               "DocumentMoniker": "D:\\Repositorio\\OCR\\OCR\\Form1.cs",
               "RelativeDocumentMoniker": "OCR\\Form1.cs",
-              "ToolTip": "D:\\Repositorio\\OCR\\OCR\\Form1.cs [Design]*",
-              "RelativeToolTip": "OCR\\Form1.cs [Design]*",
+              "ToolTip": "D:\\Repositorio\\OCR\\OCR\\Form1.cs [Dise\u00F1o]*",
+              "RelativeToolTip": "OCR\\Form1.cs [Dise\u00F1o]*",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-06-04T15:00:39.613Z",
-              "EditorCaption": " [Design]"
+              "EditorCaption": " [Dise\u00F1o]"
             },
             {
               "$type": "Document",
@@ -40,7 +44,7 @@
               "RelativeDocumentMoniker": "OCR\\Form1.cs",
               "ToolTip": "D:\\Repositorio\\OCR\\OCR\\Form1.cs*",
               "RelativeToolTip": "OCR\\Form1.cs*",
-              "ViewState": "AgIAAJUBAAAAAAAAAAAAAKoBAAApAAAAAAAAAA==",
+              "ViewState": "AgIAAHQAAAAAAAAAAAAcwHgAAAAMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-05-14T15:09:47.86Z",
               "EditorCaption": ""

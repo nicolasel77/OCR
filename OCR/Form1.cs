@@ -15,6 +15,7 @@ namespace OCR
 {
     public partial class frmInicio : Form
     {
+        private List<string> rechazados;
         public frmInicio()
         {
             InitializeComponent();
@@ -122,9 +123,43 @@ namespace OCR
             // Dividir el input en cada entrada usando los saltos de línea
             string[] inputLines = input.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
-            List<string> rechazados = new List<string> { };
+            rechazados = new List<string> { };
 
             input = "";
+
+            input += resultados(inputLines, texto, false);
+
+            int i;
+            Bitmap foto_edit;
+            for (i = 0; i < 4; i++)
+            {
+                if (rechazados.Count > 0)
+                {
+                    switch (i)
+                    {
+                        case 0:
+                            foto_edit = Ajustar_Exposicion(new Bitmap(foto_doc), 1.4f);
+                            texto = leer_imagen(PixConverter.ToPix(foto_edit));
+                            input += resultados(rechazados.ToArray(), texto, false);
+                            break;
+                        default:
+                            foto_edit = new Bitmap(rotar_imagen(foto_doc, i));
+                            texto = leer_imagen(PixConverter.ToPix(foto_edit));
+                            if (i == 3) { input += resultados(rechazados.ToArray(), texto, true); } else { input += resultados(rechazados.ToArray(), texto, false);  }
+                            break;
+                    }
+
+                }
+                else { i = 10; }
+            }
+
+            return input;
+        }
+
+        private string resultados(string[] inputLines, string texto, bool ultima)
+        {
+            rechazados = new List<string>();
+            string input = "";
             int i;
 
             foreach (string line in inputLines)
@@ -147,9 +182,9 @@ namespace OCR
                 {
                     if (match_percent >= Convert.ToDouble(percentageValue.Substring(0, percentageValue.Length - 1)))
                     {
-                        rechazados.Add(line);
-
-                        //input += $"{fieldName}: Rechazado {match_percent:0.00}%\n"; 
+                        if (ultima == false)
+                        { rechazados.Add(line); }
+                        else { input += $"{fieldName}: Rechazado {match_percent:0.00}%\n"; }
                     }
                     else { input += $"{fieldName}: Aprobado {match_percent:0.00}%\n"; }
                 }
@@ -159,115 +194,12 @@ namespace OCR
                     { input += $"{fieldName}: Aprobado {match_percent:0.00}%\n"; }
                     else
                     {
-                        rechazados.Add(line);
-
-                        //input += $"{fieldName}: Rechazado {match_percent:0.00}%\n"; 
+                        if (ultima == false)
+                        { rechazados.Add(line); }
+                        else { input += $"{fieldName}: Rechazado {match_percent:0.00}%\n"; }
                     }
                 }
             }
-
-            if (rechazados.Count > 1)
-            {
-                inputLines = rechazados.ToArray();
-                rechazados = new List<string>();
-                Bitmap foto_edit = Ajustar_Exposicion(new Bitmap(foto_doc), 1.4f);
-                texto = leer_imagen(PixConverter.ToPix(foto_edit));
-
-                foreach (string line in inputLines)
-                {
-                    // Asignar los valores capturados a las variables correspondientes
-                    string fieldName = line.Substring(0, line.IndexOf(":"));
-                    i = line.IndexOf(":") + 2;
-
-                    string operatorSign = line.Substring(i, line.IndexOf(" ", i) - i);
-                    i = line.IndexOf(" ", i + 1) + 1;
-
-                    string resultado = line.Substring(i, line.IndexOf(",", i) - i);
-                    i = line.IndexOf(",", i) + 2;
-
-                    string percentageValue = line.Substring(i, line.Length - i - 1);
-
-                    // Imprimir el resultado
-                    double match_percent = Matcheo(operatorSign, resultado, texto);
-                    if (operatorSign == "!=")
-                    {
-                        if (match_percent >= Convert.ToDouble(percentageValue.Substring(0, percentageValue.Length - 1)))
-                        {
-                            rechazados.Add(line);
-
-                            //input += $"{fieldName}: Rechazado {match_percent:0.00}%\n"; 
-                        }
-                        else { input += $"{fieldName}: Aprobado {match_percent:0.00}%\n"; }
-                    }
-                    else
-                    {
-                        if (match_percent >= Convert.ToDouble(percentageValue.Substring(0, percentageValue.Length - 1)))
-                        { input += $"{fieldName}: Aprobado {match_percent:0.00}%\n"; }
-                        else
-                        {
-                            rechazados.Add(line);
-
-                            //input += $"{fieldName}: Rechazado {match_percent:0.00}%\n"; 
-                        }
-                    }
-                }
-            }
-
-            if (rechazados.Count > 1)
-            {
-                for (int volteos = 1; volteos < 4; volteos++)
-                {
-
-                    inputLines = rechazados.ToArray();
-                    rechazados = new List<string>();
-                    Bitmap foto_edit = Ajustar_Exposicion(new Bitmap(rotar_imagen(foto_doc, volteos)), 1.4f);
-                    texto = leer_imagen(PixConverter.ToPix(foto_edit));
-
-                    foreach (string line in inputLines)
-                    {
-                        // Asignar los valores capturados a las variables correspondientes
-                        string fieldName = line.Substring(0, line.IndexOf(":"));
-                        i = line.IndexOf(":") + 2;
-
-                        string operatorSign = line.Substring(i, line.IndexOf(" ", i) - i);
-                        i = line.IndexOf(" ", i + 1) + 1;
-
-                        string resultado = line.Substring(i, line.IndexOf(",", i) - i);
-                        i = line.IndexOf(",", i) + 2;
-
-                        string percentageValue = line.Substring(i, line.Length - i - 1);
-
-                        // Imprimir el resultado
-                        double match_percent = Matcheo(operatorSign, resultado, texto);
-                        if (operatorSign == "!=")
-                        {
-                            if (match_percent >= Convert.ToDouble(percentageValue.Substring(0, percentageValue.Length - 1)))
-                            {
-                                rechazados.Add(line);
-
-                                if (volteos == 3) { input += input += $"{fieldName}: Rechazado {match_percent:0.00}%\n"; }
-                            }
-                            else { input += $"{fieldName}: Aprobado {match_percent:0.00}%\n"; }
-                        }
-                        else
-                        {
-                            if (match_percent >= Convert.ToDouble(percentageValue.Substring(0, percentageValue.Length - 1)))
-                            { input += $"{fieldName}: Aprobado {match_percent:0.00}%\n"; }
-                            else
-                            {
-                                rechazados.Add(line);
-
-                                if (volteos == 3) { input += $"{fieldName}: Rechazado {match_percent:0.00}%\n"; }
-                            }
-                        }
-                    }
-                    if (rechazados.Count < 1)
-                    {
-                        volteos = 5;
-                    }
-                }
-            }
-
 
             return input;
         }
