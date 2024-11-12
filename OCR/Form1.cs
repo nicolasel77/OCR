@@ -34,20 +34,54 @@ namespace OCR
 
         private void cmdComparar_Click(object sender, EventArgs e)
         {
-            string texto_actual = leer_imagen(PixConverter.ToPix(new Bitmap(picEntrada.Image)));
-            int posicion_correcta = 0;
-            for (int i = 1; i < 4; i++)
-            {
-                string nvo_texto = leer_imagen(PixConverter.ToPix(new Bitmap(rotar_imagen(picEntrada.Image, i))));
+            //string texto_actual = leer_imagen(PixConverter.ToPix(new Bitmap(picEntrada.Image)));
+            //int posicion_correcta = 0;
+            //for (int i = 1; i < 4; i++)
+            //{
+            //    string nvo_texto = leer_imagen(PixConverter.ToPix(new Bitmap(rotar_imagen(picEntrada.Image, i))));
 
-                if (nvo_texto.Length >  texto_actual.Length)
-                { 
-                    texto_actual = nvo_texto; 
-                    posicion_correcta = i;
-                }
-            }
+            //    if (nvo_texto.Length >  texto_actual.Length)
+            //    { 
+            //        texto_actual = nvo_texto; 
+            //        posicion_correcta = i;
+            //    }
+            //}
 
-            picEntrada.Image = rotar_imagen(picEntrada.Image, posicion_correcta);
+            //picEntrada.Image = rotar_imagen(picEntrada.Image, posicion_correcta);
+
+
+            string filePath = @"D:\demo\Ejemplos\Examples\Photo" + @"\";
+
+            picEntrada.Image = obtener_imagen(filePath + "prueba.jpeg");
+
+
+
+
+            //Bitmap imagenOriginal = new Bitmap(picEntrada.Image);
+
+            //Bitmap imagenGris = ConvertirAEscalaDeGrises(imagenOriginal);
+            //Bitmap imagenContraste = AumentarContraste(imagenGris, 2.0f); // Ajusta el contraste
+            //Bitmap imagenBinaria = AplicarFiltroUmbral(imagenContraste, 128); // Umbral de 128 para binarización
+            //picEntrada.Image = imagenContraste;
+
+
+            // Crear una copia de la imagen original para trabajar sobre ella
+            Bitmap editedImage = new Bitmap(picEntrada.Image);
+
+            // Aumentar la exposición (brillo)
+            float exposureFactor = 1.4f;  // 1.0 es sin cambio, >1.0 aumenta el brillo
+            editedImage = Ajustar_Exposicion(editedImage, exposureFactor);
+
+
+            picEntrada.Image = editedImage;
+
+            //txtRespuestas.Text = "Imagen Gris: \n" + leer_imagen(PixConverter.ToPix(imagenGris));
+            //txtRespuestas.Text += "\n \n \n \n";
+            //txtRespuestas.Text += "Imagen Contraste: \n" + leer_imagen(PixConverter.ToPix(imagenContraste));
+            //txtRespuestas.Text += "\n \n \n \n";
+            //txtRespuestas.Text += "Imagen Binaria: \n" + leer_imagen(PixConverter.ToPix(imagenBinaria));
+
+            txtSalida.Text = leer_imagen(PixConverter.ToPix(editedImage));
         }
 
         private void frmInicio_Load(object sender, EventArgs e)
@@ -58,13 +92,11 @@ namespace OCR
 
         private void cmdPrueba_Click(object sender, EventArgs e)
         {
-            string filePath = @"D:\demo\Ejemplos\Examples\Birth\Approved\" + "blanco" + @"\";
+            string filePath = @"D:\demo\Ejemplos\Examples\Birth\Approved\blanco\";
 
-            picEntrada.Image = obtener_imagen(filePath + "image.jpg");
+            //ExtractImagesFromPdf(filePath + "prueba.pdf", filePath);
 
-            //txtSalida.Text = leer_imagen(Pix.LoadFromFile(filePath + "image.jpg"));
-
-            ////lee el txt de los resultados
+            //lee el txt de los resultados
             string fileContent = File.ReadAllText(filePath + "values.txt");
 
             txtSalida.Text = leer_input(fileContent, obtener_imagen(filePath + "image.jpg"));
@@ -90,6 +122,8 @@ namespace OCR
             // Dividir el input en cada entrada usando los saltos de línea
             string[] inputLines = input.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
+            List<string> rechazados = new List<string> { };
+
             input = "";
             int i;
 
@@ -112,16 +146,129 @@ namespace OCR
                 if (operatorSign == "!=")
                 {
                     if (match_percent >= Convert.ToDouble(percentageValue.Substring(0, percentageValue.Length - 1)))
-                    { input += $"{fieldName}: Rechazado {match_percent:0.00}%\n"; }
+                    {
+                        rechazados.Add(line);
+
+                        //input += $"{fieldName}: Rechazado {match_percent:0.00}%\n"; 
+                    }
                     else { input += $"{fieldName}: Aprobado {match_percent:0.00}%\n"; }
                 }
                 else
                 {
                     if (match_percent >= Convert.ToDouble(percentageValue.Substring(0, percentageValue.Length - 1)))
                     { input += $"{fieldName}: Aprobado {match_percent:0.00}%\n"; }
-                    else { input += $"{fieldName}: Rechazado {match_percent:0.00}%\n"; }
+                    else
+                    {
+                        rechazados.Add(line);
+
+                        //input += $"{fieldName}: Rechazado {match_percent:0.00}%\n"; 
+                    }
                 }
             }
+
+            if (rechazados.Count > 1)
+            {
+                inputLines = rechazados.ToArray();
+                rechazados = new List<string>();
+                Bitmap foto_edit = Ajustar_Exposicion(new Bitmap(foto_doc), 1.4f);
+                texto = leer_imagen(PixConverter.ToPix(foto_edit));
+
+                foreach (string line in inputLines)
+                {
+                    // Asignar los valores capturados a las variables correspondientes
+                    string fieldName = line.Substring(0, line.IndexOf(":"));
+                    i = line.IndexOf(":") + 2;
+
+                    string operatorSign = line.Substring(i, line.IndexOf(" ", i) - i);
+                    i = line.IndexOf(" ", i + 1) + 1;
+
+                    string resultado = line.Substring(i, line.IndexOf(",", i) - i);
+                    i = line.IndexOf(",", i) + 2;
+
+                    string percentageValue = line.Substring(i, line.Length - i - 1);
+
+                    // Imprimir el resultado
+                    double match_percent = Matcheo(operatorSign, resultado, texto);
+                    if (operatorSign == "!=")
+                    {
+                        if (match_percent >= Convert.ToDouble(percentageValue.Substring(0, percentageValue.Length - 1)))
+                        {
+                            rechazados.Add(line);
+
+                            //input += $"{fieldName}: Rechazado {match_percent:0.00}%\n"; 
+                        }
+                        else { input += $"{fieldName}: Aprobado {match_percent:0.00}%\n"; }
+                    }
+                    else
+                    {
+                        if (match_percent >= Convert.ToDouble(percentageValue.Substring(0, percentageValue.Length - 1)))
+                        { input += $"{fieldName}: Aprobado {match_percent:0.00}%\n"; }
+                        else
+                        {
+                            rechazados.Add(line);
+
+                            //input += $"{fieldName}: Rechazado {match_percent:0.00}%\n"; 
+                        }
+                    }
+                }
+            }
+
+            if (rechazados.Count > 1)
+            {
+                for (int volteos = 1; volteos < 4; volteos++)
+                {
+
+                    inputLines = rechazados.ToArray();
+                    rechazados = new List<string>();
+                    Bitmap foto_edit = Ajustar_Exposicion(new Bitmap(rotar_imagen(foto_doc, volteos)), 1.4f);
+                    texto = leer_imagen(PixConverter.ToPix(foto_edit));
+
+                    foreach (string line in inputLines)
+                    {
+                        // Asignar los valores capturados a las variables correspondientes
+                        string fieldName = line.Substring(0, line.IndexOf(":"));
+                        i = line.IndexOf(":") + 2;
+
+                        string operatorSign = line.Substring(i, line.IndexOf(" ", i) - i);
+                        i = line.IndexOf(" ", i + 1) + 1;
+
+                        string resultado = line.Substring(i, line.IndexOf(",", i) - i);
+                        i = line.IndexOf(",", i) + 2;
+
+                        string percentageValue = line.Substring(i, line.Length - i - 1);
+
+                        // Imprimir el resultado
+                        double match_percent = Matcheo(operatorSign, resultado, texto);
+                        if (operatorSign == "!=")
+                        {
+                            if (match_percent >= Convert.ToDouble(percentageValue.Substring(0, percentageValue.Length - 1)))
+                            {
+                                rechazados.Add(line);
+
+                                if (volteos == 3) { input += input += $"{fieldName}: Rechazado {match_percent:0.00}%\n"; }
+                            }
+                            else { input += $"{fieldName}: Aprobado {match_percent:0.00}%\n"; }
+                        }
+                        else
+                        {
+                            if (match_percent >= Convert.ToDouble(percentageValue.Substring(0, percentageValue.Length - 1)))
+                            { input += $"{fieldName}: Aprobado {match_percent:0.00}%\n"; }
+                            else
+                            {
+                                rechazados.Add(line);
+
+                                if (volteos == 3) { input += $"{fieldName}: Rechazado {match_percent:0.00}%\n"; }
+                            }
+                        }
+                    }
+                    if (rechazados.Count < 1)
+                    {
+                        volteos = 5;
+                    }
+                }
+            }
+
+
             return input;
         }
 
@@ -176,15 +323,10 @@ namespace OCR
                     case "!=":
                         return Buscar_matcheo_fechas(texto, resultado);
                     case ">=":
-                        Console.WriteLine("Operador mayor o igual");
-                        break;
                     case "<=":
-                        Console.WriteLine("Operador menor o igual");
-                        break;
                     case "<":
-                        Console.WriteLine("Operador menor o igual");
-                        break;
                     case ">":
+                        //Seccion en desarrollo
                         Console.WriteLine("Operador menor o igual");
                         break;
                 }
@@ -199,8 +341,8 @@ namespace OCR
             }
         }
 
-
         #region Pdf
+
         static void ExtractImagesFromPdf(string pdfPath, string outputPath)
         {
             PdfDocument pdfDoc = new PdfDocument(new PdfReader(pdfPath));
@@ -212,8 +354,6 @@ namespace OCR
                 var processor = new PdfCanvasProcessor(imageListener);
                 processor.ProcessPageContent(page);
             }
-
-            Console.WriteLine("Extracción completada.");
         }
 
         public class ImageRenderListener : IEventListener
@@ -280,73 +420,175 @@ namespace OCR
             return image;
         }
 
-        //Desaturar
-        private void cmdDesaturar_Click(object sender, EventArgs e)
+        private static Bitmap Ajustar_Exposicion(Bitmap originalImage, float exposureFactor)
         {
-            //txtRespuestas.Text = txtSalida.Text;
+            // Crear una copia de la imagen original para modificarla
+            Bitmap tempImage = new Bitmap(originalImage);
 
-            // Guardar la imagen resultante
-            string s = lblImagen.Text.Substring(0, lblImagen.Text.LastIndexOf("\\") + 1);
-
-            string d = s;
-            string i = lblImagen.Text.Substring(lblImagen.Text.LastIndexOf("."));
-            string c = lblImagen.Text.Substring(s.Length, lblImagen.Text.Length - s.Length - i.Length);
-            string n = $"{d}Copia {c}{i}";
-
-            string outputImagePath = n;
-            float exposure = 1.2f; // Adjust this value for more or less exposure
-
-            using (Bitmap bitmap = new Bitmap(lblImagen.Text))
+            for (int y = 0; y < tempImage.Height; y++)
             {
-                AdjustExposure(bitmap, exposure);
-                bitmap.Save(outputImagePath, System.Drawing.Imaging.ImageFormat.Jpeg);
+                for (int x = 0; x < tempImage.Width; x++)
+                {
+                    // Obtener el color del píxel
+                    Color pixelColor = tempImage.GetPixel(x, y);
+
+                    // Aumentar los valores de los canales RGB (Red, Green, Blue)
+                    int r = (int)(pixelColor.R * exposureFactor);
+                    int g = (int)(pixelColor.G * exposureFactor);
+                    int b = (int)(pixelColor.B * exposureFactor);
+
+                    // Asegurarse de que los valores no superen 255 (máximo valor para RGB)
+                    r = Math.Min(255, Math.Max(0, r));
+                    g = Math.Min(255, Math.Max(0, g));
+                    b = Math.Min(255, Math.Max(0, b));
+
+                    // Establecer el nuevo color del píxel
+                    tempImage.SetPixel(x, y, Color.FromArgb(r, g, b));
+                }
             }
 
-            lblImagen.Text = n;
-
-            picEntrada.ImageLocation = n;
-
+            return tempImage;
         }
-
-        static void AdjustExposure(Bitmap bitmap, float exposure)
+        private static Bitmap Ajustar_Brillo(Bitmap image, float factor)
         {
-            // Lock the bitmap's bits.
-            Rectangle rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
-            BitmapData bmpData = bitmap.LockBits(rect, ImageLockMode.ReadWrite, bitmap.PixelFormat);
+            Bitmap temp = (Bitmap)image.Clone();
+            float brightness = factor - 1.0f;
+            float[][] colorMatrixElements = {
+            new float[] {1, 0, 0, 0, 0},
+            new float[] {0, 1, 0, 0, 0},
+            new float[] {0, 0, 1, 0, 0},
+            new float[] {0, 0, 0, 1, 0},
+            new float[] {brightness, brightness, brightness, 0, 1}
+        };
 
-            // Get the address of the first line.
-            IntPtr ptr = bmpData.Scan0;
-
-            // Declare an array to hold the bytes of the bitmap.
-            int bytes = Math.Abs(bmpData.Stride) * bitmap.Height;
-            byte[] rgbValues = new byte[bytes];
-
-            // Copy the RGB values into the array.
-            System.Runtime.InteropServices.Marshal.Copy(ptr, rgbValues, 0, bytes);
-
-            // Adjust the exposure.
-            for (int i = 0; i < rgbValues.Length; i += 4)
+            ColorMatrix colorMatrix = new ColorMatrix(colorMatrixElements);
+            using (Graphics g = Graphics.FromImage(temp))
             {
-                rgbValues[i] = AdjustPixel(rgbValues[i], exposure);     // Blue
-                rgbValues[i + 1] = AdjustPixel(rgbValues[i + 1], exposure); // Green
-                rgbValues[i + 2] = AdjustPixel(rgbValues[i + 2], exposure); // Red
-                                                                            // Alpha channel (rgbValues[i + 3]) stays the same
+                using (ImageAttributes attributes = new ImageAttributes())
+                {
+                    attributes.SetColorMatrix(colorMatrix);
+                    g.DrawImage(image, new Rectangle(0, 0, image.Width, image.Height), 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, attributes);
+                }
             }
-
-            // Copy the RGB values back to the bitmap.
-            System.Runtime.InteropServices.Marshal.Copy(rgbValues, 0, ptr, bytes);
-
-            // Unlock the bits.
-            bitmap.UnlockBits(bmpData);
+            return temp;
         }
 
-        static byte AdjustPixel(byte colorValue, float exposure)
+        private static Bitmap Ajustar_contraste(Bitmap image, float factor)
         {
-            float newValue = colorValue * exposure;
-            if (newValue < 0) { newValue = 0; }
-            if (newValue > 255) { newValue = 255; }
+            Bitmap temp = (Bitmap)image.Clone();
+            float contrast = factor;
+            float t = (1.0f - contrast) / 2.0f;
 
-            return (byte)newValue;
+            float[][] colorMatrixElements = {
+            new float[] {contrast, 0, 0, 0, t},
+            new float[] {0, contrast, 0, 0, t},
+            new float[] {0, 0, contrast, 0, t},
+            new float[] {0, 0, 0, 1.0f, 0},
+            new float[] {0, 0, 0, 0, 1.0f}
+        };
+
+            ColorMatrix colorMatrix = new ColorMatrix(colorMatrixElements);
+            using (Graphics g = Graphics.FromImage(temp))
+            {
+                using (ImageAttributes attributes = new ImageAttributes())
+                {
+                    attributes.SetColorMatrix(colorMatrix);
+                    g.DrawImage(image, new Rectangle(0, 0, image.Width, image.Height), 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, attributes);
+                }
+            }
+            return temp;
+        }
+
+        private static Bitmap Ajustar_Sombras(Bitmap image, float shadowFactor)
+        {
+            Bitmap temp = (Bitmap)image.Clone();
+            float shadowAdjustment = shadowFactor;
+
+            using (Graphics g = Graphics.FromImage(temp))
+            {
+                for (int y = 0; y < image.Height; y++)
+                {
+                    for (int x = 0; x < image.Width; x++)
+                    {
+                        Color pixelColor = image.GetPixel(x, y);
+                        int r = (int)(pixelColor.R * shadowAdjustment);
+                        int gColor = (int)(pixelColor.G * shadowAdjustment);
+                        int b = (int)(pixelColor.B * shadowAdjustment);
+
+                        // Limitar los valores a un rango válido
+                        r = Math.Min(255, Math.Max(0, r));
+                        gColor = Math.Min(255, Math.Max(0, gColor));
+                        b = Math.Min(255, Math.Max(0, b));
+
+                        temp.SetPixel(x, y, Color.FromArgb(r, gColor, b));
+                    }
+                }
+            }
+            return temp;
+        }
+
+        #endregion
+
+        #region Binarizacion de imagen
+        private Bitmap ConvertirAEscalaDeGrises(Bitmap imagenOriginal)
+        {
+            Bitmap imagenGris = new Bitmap(imagenOriginal.Width, imagenOriginal.Height);
+            using (Graphics g = Graphics.FromImage(imagenGris))
+            {
+                ColorMatrix colorMatrix = new ColorMatrix(new float[][]
+                {
+            new float[] { 0.3f, 0.3f, 0.3f, 0, 0 },
+            new float[] { 0.59f, 0.59f, 0.59f, 0, 0 },
+            new float[] { 0.11f, 0.11f, 0.11f, 0, 0 },
+            new float[] { 0, 0, 0, 1, 0 },
+            new float[] { 0, 0, 0, 0, 1 }
+                });
+                ImageAttributes attributes = new ImageAttributes();
+                attributes.SetColorMatrix(colorMatrix);
+
+                g.DrawImage(imagenOriginal, new Rectangle(0, 0, imagenOriginal.Width, imagenOriginal.Height), 0, 0, imagenOriginal.Width, imagenOriginal.Height, GraphicsUnit.Pixel, attributes);
+            }
+            return imagenGris;
+        }
+
+        private Bitmap AumentarContraste(Bitmap imagenGris, float factorContraste)
+        {
+            Bitmap imagenContraste = new Bitmap(imagenGris.Width, imagenGris.Height);
+            using (Graphics g = Graphics.FromImage(imagenContraste))
+            {
+                float ajuste = 0.5f * (1.0f - factorContraste);
+                ColorMatrix colorMatrix = new ColorMatrix(new float[][]
+                {
+            new float[] { factorContraste, 0, 0, 0, 0 },
+            new float[] { 0, factorContraste, 0, 0, 0 },
+            new float[] { 0, 0, factorContraste, 0, 0 },
+            new float[] { 0, 0, 0, 1, 0 },
+            new float[] { ajuste, ajuste, ajuste, 0, 1 }
+                });
+                ImageAttributes attributes = new ImageAttributes();
+                attributes.SetColorMatrix(colorMatrix);
+
+                g.DrawImage(imagenGris, new Rectangle(0, 0, imagenGris.Width, imagenGris.Height), 0, 0, imagenGris.Width, imagenGris.Height, GraphicsUnit.Pixel, attributes);
+            }
+            return imagenContraste;
+        }
+
+        private Bitmap AplicarFiltroUmbral(Bitmap imagenContraste, int umbral)
+        {
+            Bitmap imagenBinaria = new Bitmap(imagenContraste.Width, imagenContraste.Height);
+            for (int x = 0; x < imagenContraste.Width; x++)
+            {
+                for (int y = 0; y < imagenContraste.Height; y++)
+                {
+                    Color color = imagenContraste.GetPixel(x, y);
+                    int intensidad = (color.R + color.G + color.B) / 3;
+                    if (intensidad > umbral)
+                        imagenBinaria.SetPixel(x, y, Color.White);
+                    else
+                        imagenBinaria.SetPixel(x, y, Color.Black);
+                }
+            }
+            return imagenBinaria;
         }
 
         #endregion

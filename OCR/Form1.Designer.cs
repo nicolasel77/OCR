@@ -200,7 +200,6 @@
             this.cmdDesaturar.TabIndex = 6;
             this.cmdDesaturar.Text = "Desaturar";
             this.cmdDesaturar.UseVisualStyleBackColor = true;
-            this.cmdDesaturar.Click += new System.EventHandler(this.cmdDesaturar_Click);
             // 
             // cbTipo
             // 
