@@ -10,6 +10,7 @@ using System.Globalization;
 using System.IO;
 using System.Windows.Forms;
 using Tesseract;
+using DocuCheck;
 
 namespace OCR
 {
@@ -99,9 +100,9 @@ namespace OCR
 
             //lee el txt de los resultados
             string fileContent = File.ReadAllText(filePath + "values.txt");
+            DocuCheck.Docu_check dc = new DocuCheck.Docu_check();
 
-            txtSalida.Text = leer_input(fileContent, obtener_imagen(filePath + "image.jpg"));
-
+            txtSalida.Text = dc.leer_input(fileContent, obtener_imagen(filePath + "image.jpg"));
         }
 
         private string leer_input(string input, object archivo)
