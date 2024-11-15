@@ -102,7 +102,7 @@ namespace OCR
             string fileContent = File.ReadAllText(filePath + "values.txt");
             DocuCheck.Docu_check dc = new DocuCheck.Docu_check();
 
-            txtSalida.Text = dc.leer_input(fileContent, obtener_imagen(filePath + "image.jpg"));
+            txtSalida.Text = dc.leer_input(fileContent, obtener_imagen(filePath + "imagen2.jpg"));
         }
 
         private string leer_input(string input, object archivo)
